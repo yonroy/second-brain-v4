@@ -181,9 +181,10 @@ Kiểm thực tế ngày 2026-10-21 bằng `claude -p`:
 
 Nạp bằng `omp --hook /mnt/d/SecondBrainV3/Brain/hooks/omp/brain-v3.ts`. Đã kiểm bằng `omp -p` ngày 2026-10-21: context, trap và việc tự chạy lượt bổ sung đều hoạt động.
 
-Chưa làm:
-- PreToolUse `Agent` → `brain brief-lint` (cùng lúc port agent-ops, pha 5);
-- SessionEnd → `brain ingest` (pha 5).
+Thêm ở pha 5:
+- PreToolUse `Agent|Task` → `brain brief-lint --hook`: cảnh báo qua `additionalContext` khi brief subagent thiếu mục; không chặn;
+- SessionEnd → `brain ingest claude --hook`;
+- omp `session_shutdown` → `brain ingest omp --hook`.
 
 ## 7. Lớp thực thi (ADR-006)
 

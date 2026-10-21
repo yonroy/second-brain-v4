@@ -43,7 +43,7 @@ bin\brain.cmd <lệnh>                                # cmd / PowerShell
 
 ## Hook
 
-- **Claude Code:** `brain init` cài sẵn 4 hook: SessionStart, UserPromptSubmit, PreToolUse, Stop. Xem spec §6.
+- **Claude Code:** `brain init` cài sẵn các hook: SessionStart, UserPromptSubmit, PreToolUse (trap + brief-lint cho `Agent`), Stop, SessionEnd (ingest). Xem spec §6.
 - **omp** (WSL): `omp --hook /mnt/d/SecondBrainV3/Brain/hooks/omp/brain-v3.ts …`. Extension gọi cùng CLI bằng `python3` (đổi bằng env `BRAIN_PYTHON`). Muốn nạp mặc định thì thêm file này vào danh sách extension trong cấu hình omp.
 
 Project được suy ra từ cwd: nằm trong codebase hoặc trong `_projects/<p>` là đủ. Có thể chỉ định bằng `--project <tên>`. Hub lấy từ env `SECOND_BRAIN_V3_ROOT`, mặc định là thư mục cha của package.
