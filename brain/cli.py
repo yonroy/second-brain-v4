@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from brain import VERSION, gate, hooks, paths, session, traps, verify
+from brain import VERSION, gate, hooks, paths, session, skills, traps, verify
 from brain.init import init
 from brain.project import ProjectNotFound, find_project
 
@@ -30,6 +30,9 @@ def cmd_init(a) -> int:
     print(f"  CLAUDE.md: {r['claude_md']}")
     if not a.no_hooks:
         print(f"  hooks Claude Code: {hooks.install(codebase.resolve())}")
+    if not a.no_skills:
+        res = skills.install(codebase.resolve())
+        print("  skills: " + ", ".join(f"{n} ({how})" for n, how in res))
     if r["legacy"]:
         print(f"  ⚠ Codebase còn {', '.join(r['legacy'])}/ của v1/v2: chuyển phần cần giữ vào hub rồi xoá (gate sẽ báo 🔴).")
     return 0
@@ -44,6 +47,13 @@ def cmd_hooks(a) -> int:
     else:
         for ev, ok in hooks.status(p.codebase).items():
             print(f"{'✅' if ok else '❌'} {ev}")
+    return 0
+
+
+def cmd_skills(a) -> int:
+    codebase = None if a.global_ else _project(a).codebase
+    for name, how in skills.install(codebase, global_=a.global_):
+        print(f"  {name}: {how}")
     return 0
 
 
@@ -123,7 +133,13 @@ def main(argv=None) -> int:
     s.add_argument("--name")
     s.add_argument("--path", help="codebase (mặc định: cwd)")
     s.add_argument("--no-hooks", action="store_true", help="không cài hook Claude Code")
+    s.add_argument("--no-skills", action="store_true", help="không link skill lớp thực thi vào .claude/skills")
     s.set_defaults(fn=cmd_init)
+
+    s = sub.add_parser("skills", help="link skill lớp thực thi (lam, hieu, tdd, soi, sua-goc, nhat-ky)")
+    s.add_argument("action", choices=["install"], nargs="?", default="install")
+    s.add_argument("--global", dest="global_", action="store_true", help="vào ~/.claude/skills thay vì codebase")
+    s.set_defaults(fn=cmd_skills)
 
     s = sub.add_parser("hooks", help="cài / gỡ / xem hook Claude Code của project")
     s.add_argument("action", choices=["install", "remove", "status"], nargs="?", default="status")

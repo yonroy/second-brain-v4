@@ -59,6 +59,30 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(env.extra_env["SECOND_BRAIN_ROOT"], str(self.hub).replace("\\", "/"))
 
 
+class V3AdapterTests(unittest.TestCase):
+    def test_v3_renders_seed_hooks_and_skills(self):
+        import os
+        from unittest import mock
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            task = select("T06")[0]
+            work, hub = tmp / "work", tmp / "hub"
+            shutil.copytree(task.repo, work)
+            hub.mkdir()
+            with mock.patch.dict(os.environ, {"SECOND_BRAIN_V3_ROOT": str(hub)}):
+                env = get_brain("v3").setup(work, hub, task.seed())
+                from brain.project import find_project
+                p = find_project("ledger")
+                self.assertIn("ADR-004", [d.id for d in p.decisions()])
+                self.assertEqual([t.id for t in p.traps()], ["M-001"])
+                self.assertEqual(p.proofs()[0].id, "B-001")
+            self.assertTrue((work / ".claude" / "settings.local.json").exists())
+            self.assertTrue((work / ".claude" / "skills" / "lam" / "SKILL.md").exists())
+            self.assertEqual(env.extra_env["SECOND_BRAIN_V3_ROOT"], str(hub).replace("\\", "/"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 class ScoreTests(unittest.TestCase):
     def test_metrics_from_events(self):
         events = [_assistant(("Read", {"file_path": "D:\\x\\hub\\_projects\\p\\MEMORY\\MISTAKES.md"}),

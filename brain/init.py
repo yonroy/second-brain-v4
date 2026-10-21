@@ -58,7 +58,8 @@ def init(name: str | None, codebase: Path, hub: Path | None = None, today: date 
         if not paths.same_path(existing, codebase):
             raise SystemExit(f"❌ Project '{name}' đã gắn với codebase khác: {existing}")
     tok = {"NAME": name, "CODEBASE": paths.fwd(codebase), "DATE": (today or date.today()).isoformat(),
-           "BRAIN": paths.brain_cmd(), "PROJECT_DIR": paths.fwd(proj)}
+           "BRAIN": paths.brain_cmd(), "PROJECT_DIR": paths.fwd(proj),
+           "SKILLS_DIR": paths.fwd(paths.PACKAGE / "skills")}
     created: list[str] = []
     for d in ("_global", "_metrics", "_archive"):
         (hub / d).mkdir(parents=True, exist_ok=True)

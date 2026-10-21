@@ -2,8 +2,9 @@ from bench.brains.base import Brain, Env
 from bench.brains.none import NoBrain
 from bench.brains.v1 import V1
 from bench.brains.v2 import V2
+from bench.brains.v3 import V3
 
-BRAINS: dict[str, type[Brain]] = {b.name: b for b in (NoBrain, V1, V2)}
+BRAINS: dict[str, type[Brain]] = {b.name: b for b in (NoBrain, V1, V2, V3)}
 
 
 def get_brain(name: str) -> Brain:

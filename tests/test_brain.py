@@ -304,6 +304,17 @@ class HookInstallTests(Base):
         self.assertEqual([h["command"] for e in cfg["hooks"]["Stop"] for h in e["hooks"]], ["echo mine"])
         self.assertNotIn("PreToolUse", cfg["hooks"])
 
+    def test_skills_install_links_and_is_idempotent(self):
+        from brain import skills
+        first = dict(skills.install(self.code))
+        self.assertEqual(set(first), {"lam", "hieu", "tdd", "soi", "sua-goc", "nhat-ky"})
+        self.assertTrue((self.code / ".claude" / "skills" / "lam" / "playbooks" / "sua-bug.md").exists())
+        self.assertTrue((self.code / ".claude" / "skills" / "lam" / "nguyen-tac" / "idempotent.md").exists())
+        again = dict(skills.install(self.code))
+        self.assertTrue(all(v in ("đã có",) for v in again.values()), again)
+        self.assertIn(".claude/skills/lam", (self.code / ".git" / "info" / "exclude").read_text(encoding="utf-8"))
+        self.assertIn("/skills/lam/SKILL.md", (self.code / "CLAUDE.md").read_text(encoding="utf-8"))
+
     def test_cli_init_installs_hooks(self):
         other = self.tmp / "code" / "svc"
         other.mkdir()
