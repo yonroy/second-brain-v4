@@ -1,0 +1,38 @@
+[project]
+name = "shop"
+summary = "Cửa hàng trực tuyến"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-01"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "Không có dependency ngoài; không cài thêm package"
+date = "2026-09-20"
+source = "ADR-001"
+
+[[decisions]]
+id = "ADR-001"
+date = "2026-09-20"
+title = "Chỉ dùng thư viện chuẩn Python"
+decision = "Không thêm dependency ngoài vào dự án."
+why = "Repo chạy trên máy build khoá mạng."
+
+[[traps]]
+id = "M-001"
+title = "Chạy test sai thư mục làm import src lỗi"
+trigger = ["tests/*", "kw:unittest"]
+symptom = "ModuleNotFoundError: No module named 'src'"
+fix = "Luôn chạy `python -m unittest discover -s tests -t .` ở thư mục gốc repo."
+seen = ["2026-09-22"]
+
+[[facts]]
+section = "env"
+text = "DB: PostgreSQL tại `db.local:5432`, user `app`, database `shop`"
+date = "2025-03-02"
+source = "user"

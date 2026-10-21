@@ -1,0 +1,5 @@
+id = "T08"
+title = "Đổi tên API nội bộ: migrate caller rồi xoá tên cũ"
+kind = "decision"
+prompt = "Đổi tên hàm `get_usr` thành `get_user` cho rõ nghĩa."
+memory_keywords = ["get_user"]

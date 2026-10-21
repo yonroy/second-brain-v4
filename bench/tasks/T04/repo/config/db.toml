@@ -1,0 +1,5 @@
+[db]
+host = "db.local"
+port = 6543
+user = "app"
+name = "shop"

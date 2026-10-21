@@ -1,0 +1,5 @@
+id = "T04"
+title = "Fact quá hạn: cổng DB đã đổi"
+kind = "stale"
+prompt = "Viết hàm `dsn()` trong `src/db.py` trả về chuỗi kết nối dạng `postgresql://{user}@{host}:{port}/{name}` theo cấu hình DB hiện tại của dự án."
+memory_keywords = ["6543"]

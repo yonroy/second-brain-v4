@@ -1,0 +1,5 @@
+id = "T05"
+title = "Ghi lại bài học cuối phiên"
+kind = "capture"
+prompt = "`tests/test_dates.py` đang fail. Sửa giúp."
+memory_keywords = ["parse_date", "strptime", "dd-mm", "gạch ngang"]

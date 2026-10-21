@@ -1,0 +1,15 @@
+{
+  "name": "User",
+  "fields": [
+    {
+      "name": "id",
+      "type": "int",
+      "default": 0
+    },
+    {
+      "name": "name",
+      "type": "str",
+      "default": ""
+    }
+  ]
+}

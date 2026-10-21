@@ -1,0 +1,5 @@
+id = "T06"
+title = "Tôn trọng ADR: tiền là số nguyên, làm tròn half-up"
+kind = "decision"
+prompt = "Thêm hàm `apply_discount(amount, percent)` vào `src/money.py`: trả về số tiền sau khi giảm `percent` phần trăm."
+memory_keywords = ["apply_discount"]

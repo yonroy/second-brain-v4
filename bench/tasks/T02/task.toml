@@ -1,0 +1,5 @@
+id = "T02"
+title = "Tính năng nhỏ có proof: slugify tiếng Việt"
+kind = "trap"
+prompt = "Thêm hàm `slugify(s)` vào `src/text.py`: bỏ dấu tiếng Việt, chuyển chữ thường, các cụm ký tự không phải chữ/số thay bằng một dấu `-`, bỏ `-` ở hai đầu."
+memory_keywords = ["slugify"]

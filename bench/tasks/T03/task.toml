@@ -1,0 +1,5 @@
+id = "T03"
+title = "Phải dùng fact cũ đúng: API nội bộ"
+kind = "fact"
+prompt = "Viết hàm `fetch_report(report_id)` trong `src/reports.py` lấy một báo cáo từ API báo cáo nội bộ của công ty, dùng helper `http_get` trong `src/http.py`, trả về dict JSON."
+memory_keywords = ["fetch_report"]

@@ -1,0 +1,5 @@
+id = "T07"
+title = "Retry không được ghi trùng"
+kind = "trap"
+prompt = "Viết hàm `load_orders(conn, rows)` trong `src/store.py` nạp danh sách đơn hàng (mỗi phần tử là dict có `order_id`, `total`) vào bảng `orders`."
+memory_keywords = ["load_orders", "upsert", "idempotent"]

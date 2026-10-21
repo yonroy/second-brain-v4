@@ -1,0 +1,5 @@
+id = "T01"
+title = "File sinh tự động: thêm trường phải sửa schema"
+kind = "trap"
+prompt = "Thêm trường `email` (chuỗi, mặc định rỗng) cho model `User`, và đảm bảo test vẫn chạy."
+memory_keywords = ["email", "gen.py"]
