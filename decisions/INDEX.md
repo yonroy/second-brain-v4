@@ -10,3 +10,7 @@
 | [ADR-006](ADR-006-lop-thuc-thi-tu-pstack.md) | 2026-10-21 | Lớp thực thi viết lại từ pstack | accepted |
 | [ADR-007](ADR-007-benchmark-truoc.md) | 2026-10-21 | Benchmark trước khi build, so mọi version | accepted |
 | [ADR-008](ADR-008-do-tu-transcript.md) | 2026-10-21 | Đo từ transcript, một schema chung | accepted |
+| [ADR-009](ADR-009-hub-rieng-v4.md) | 2026-10-21 | Hub riêng D:\SecondBrainV4, package clone từ V3 | proposed |
+| [ADR-010](ADR-010-recall-stdlib-tat-dinh.md) | 2026-10-21 | Lớp Recall bằng stdlib, tất định | proposed |
+| [ADR-011](ADR-011-tiem-co-ngan-sach.md) | 2026-10-21 | Tiêm context có ngân sách và sổ ghi | proposed |
+| [ADR-012](ADR-012-quyet-dinh-theo-lien-quan.md) | 2026-10-21 | Quyết định theo liên quan thay cho in tất cả | proposed |
