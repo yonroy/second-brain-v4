@@ -1,6 +1,6 @@
 # Second Brain v3
 
-Package cho hub `D:\SecondBrainV3`. **Trạng thái: pha 0, spec chờ duyệt.**
+Package cho hub `D:\SecondBrainV3`. **Trạng thái: pha 1 (benchmark).**
 
 - Spec: [spec/second-brain-v3.md](spec/second-brain-v3.md)
 - Quyết định: [decisions/INDEX.md](decisions/INDEX.md)

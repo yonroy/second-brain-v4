@@ -1,6 +1,6 @@
 # ADR-007 — Benchmark trước khi build, so mọi version
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 v2 chỉ có N=1 và không có nhóm đối chứng, nên không kết luận được luật harness có giúp không (research-overview-charts:41). User muốn so v1, v2 và v3.

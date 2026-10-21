@@ -1,6 +1,6 @@
 # ADR-003 — Bỏ thang L0–L4, dùng 3 module
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 Không project nào có artifact của L2–L4 (contract, BOARD, MATURITY). Init v2 không có lệnh lên cấp. Có 17 file / 5 level phải nhớ.

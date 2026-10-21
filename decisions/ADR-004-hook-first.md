@@ -1,6 +1,6 @@
 # ADR-004 — Enforce bằng hook, không bằng nghi lễ
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 Nghi lễ 3 bị bỏ ở hầu hết các phiên. Lời dặn "grep MISTAKES" không được làm theo (1/37 phiên).

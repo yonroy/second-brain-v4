@@ -1,6 +1,6 @@
 # ADR-002 — Một CLI Python stdlib `brain`
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 v2 có harness.ps1 và harness.sh viết lặp cùng logic (`pack` chỉ có trong bản sh), PowerShell 5.1 cần BOM, cộng 3 script Python cần PyYAML. Trên Windows `python3` chỉ là stub của Microsoft Store. `python` 3.14 có trên Windows và `python3` 3.14 có trong WSL.

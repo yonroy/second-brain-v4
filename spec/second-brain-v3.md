@@ -1,6 +1,6 @@
 # Second Brain v3 — Spec
 
-> Trạng thái: **DRAFT, chờ duyệt (pha 0)** · 2026-10-21 · package `D:\SecondBrainV3\Brain` v3.0.0-dev
+> Trạng thái: **ACCEPTED 2026-10-21** · 2026-10-21 · package `D:\SecondBrainV3\Brain` v3.0.0-dev
 > Quyết định nền: `decisions/ADR-001` … `ADR-008`.
 
 ## 1. Mục đích

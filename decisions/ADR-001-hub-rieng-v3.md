@@ -1,6 +1,6 @@
 # ADR-001 — Hub riêng D:\SecondBrainV3, memory ở hub
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 v2 để memory ở hub D:\SecondBrainV2. User muốn v3 tách hẳn để v2 giữ nguyên và so sánh được. Codebase còn bản MEMORY/ cũ đã gây đọc/ghi nhầm ở AFE (MONITOR M-029, phiên don-memory). omp/herdr chạy trong WSL, còn Claude Code chạy trên Windows.

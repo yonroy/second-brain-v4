@@ -1,6 +1,6 @@
 # ADR-005 — Mỗi loại tri thức một kho
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 v2 có nhiều kho trùng nhau: DECISIONS.md và ADR; sessions, MONITOR, runs.tsv và harvested.tsv; CONTEXT §Bẫy, MISTAKES và _global/mistakes; TEST_MATRIX, story Proof và contract. Kết quả là DECISIONS 152 KB bị cũ và mâu thuẫn với code (M-033, M-090).

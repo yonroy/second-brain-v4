@@ -1,6 +1,6 @@
 # ADR-006 — Lớp thực thi viết lại từ pstack
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 Harness v2 không quy định cách làm bên trong một task. pstack (cursor/plugins, MIT, v0.15.29) có router, playbook và principle, nhưng thiên về Cursor, mặc định dùng model grok, không chặn chờ người duyệt, và nhiều playbook xoay quanh PR.

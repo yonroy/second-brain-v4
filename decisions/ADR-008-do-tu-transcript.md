@@ -1,6 +1,6 @@
 # ADR-008 — Đo từ transcript, một schema chung
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 agent-ops v2 chỉ đọc được log omp, có hardcode miền, và harvest ghi đôi. Agent tự khai sai khoảng 1/3.
