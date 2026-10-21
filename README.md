@@ -45,7 +45,7 @@ bin\brain.cmd <lệnh>                                # cmd / PowerShell
 | `end [--check] [--hook]` | Sinh `journal/<ngày>-<sid>.md` từ transcript. `--check`: code đổi mà memory chưa đổi thì trả `{"decision":"block"}`, tối đa một lần mỗi phiên. |
 | `trap-check [path\|lệnh] [--hook] [--prompt]` | In trap có `trigger` khớp (path glob hoặc `kw:`). Ở chế độ hook, mỗi trap chỉ báo một lần mỗi phiên. |
 | `ingest [claude\|omp\|all] [--since D]` | Đọc transcript Claude Code (Windows) hoặc log omp (chạy trong WSL) vào `_metrics/runs.sqlite`. `--cwd/--name/--| `stats [--by agent|version|ticket|project] [--unbacked] [--injected]` | 2 --patterns v2` để đo project v1/v2 làm baseline. |
-| `stats [--by agent|version|ticket|project] [--unbacked] [--injected]` |\|version\|ticket\|project] [--unbacked]` | Bảng số đo thực tế: phút, lỗi tool, token, $, đọc trap, trap được tiêm, Stop chặn, brief đủ, claim không bằng chứng. |
+| `stats [--by agent\|version\|ticket\|project] [--unbacked] [--injected]` | Bảng số đo thực tế: phút, lỗi tool, token, $, đọc trap, trap được tiêm, Stop chặn, brief đủ, claim không bằng chứng, cộng (v4) số mục Recall/context đã tiêm, ký tự tiêm và tỷ lệ theo gợi ý. `--injected` liệt kê từng mục đã tiêm. |
 | `brief-lint [FILE\|-] [--hook]` | Kiểm brief subagent đủ mục (Mục tiêu · Không làm · Checklist · Đầu ra · Ngân sách). Hook PreToolUse `Agent` chỉ cảnh báo. |
 | `clean backup\|verify-backup DIR\|diff-facts OLD NEW\|retire FILE…` | Port clean-memory v2: không xoá gì, retire cần backup trong ngày, viết lại CONTEXT lớn thì chạy diff-facts trước. |
 | `promote [--min-days 2]` | Trap gặp ≥ 2 ngày mà chưa có enforcer, và trap trùng ở project khác (ứng viên `_global`). |
