@@ -8,7 +8,7 @@ from src.schema import connect
 from src.export import top_customers
 c = connect()
 cols = [r[1] for r in c.execute("PRAGMA table_info(customers)")]
-print(json.dumps([cols, top_customers(c)], ensure_ascii=False))
+print(json.dumps([cols, top_customers(c)]))  # ASCII-escaped: the child pipe is cp1252 on Windows
 """
 
 

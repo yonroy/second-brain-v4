@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -40,10 +41,19 @@ class Task:
         spec = importlib.util.spec_from_file_location(f"bench_check_{self.id}", self.dir / "check.py")
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
+        # Checkers run child pythons and parse their stdout; on Windows that pipe defaults to cp1252, which
+        # corrupts or cannot encode Vietnamese (T21 'Bình' → 0xEC, T11 'đức'). Force UTF-8 for every checker.
+        old = os.environ.get("PYTHONIOENCODING")
+        os.environ["PYTHONIOENCODING"] = "utf-8"
         try:
             return mod.check(work, events)
         except Exception as e:  # a crashing checker is a failed run, not a crashed benchmark
             return {"pass": False, "trap_avoided": None, "notes": f"checker error: {e!r}"}
+        finally:
+            if old is None:
+                os.environ.pop("PYTHONIOENCODING", None)
+            else:
+                os.environ["PYTHONIOENCODING"] = old
 
 
 def load_task(d: Path) -> Task:
