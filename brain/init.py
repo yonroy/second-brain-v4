@@ -6,10 +6,10 @@ import tomllib
 from datetime import date
 from pathlib import Path
 
-from brain import paths
+from brain import BLOCK, LEGACY_BLOCKS, paths
 
 TEMPLATES = paths.PACKAGE / "templates"
-BLOCK_RE = re.compile(r"<!-- SECOND-BRAIN-V3:START.*?SECOND-BRAIN-V3:END -->", re.S)
+BLOCK_RE = re.compile(rf"<!-- {BLOCK}:START.*?{BLOCK}:END -->", re.S)
 NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._ -]{0,63}$")
 
 
@@ -28,7 +28,7 @@ def _write_new(path: Path, text: str, created: list[str]) -> None:
 
 
 def merge_block(claude_md: Path, block: str) -> str:
-    """Insert or replace the v3 block; returns what happened."""
+    """Insert or replace this generation's block; returns what happened."""
     if not claude_md.exists():
         claude_md.write_text(f"# {claude_md.parent.name}\n\n{block}\n", encoding="utf-8", newline="\n")
         return "created"
@@ -41,6 +41,22 @@ def merge_block(claude_md: Path, block: str) -> str:
         return "unchanged"
     claude_md.write_text(cur.rstrip() + "\n\n" + block, encoding="utf-8", newline="\n")
     return "appended"
+
+
+def remove_legacy_blocks(claude_md: Path) -> list[str]:
+    """Strip CLAUDE.md blocks of older brain generations (ADR-009). Returns the markers removed."""
+    if not claude_md.exists():
+        return []
+    text = claude_md.read_text(encoding="utf-8")
+    removed = []
+    for b in LEGACY_BLOCKS:
+        pat = re.compile(rf"\n*<!-- {b}:START.*?{b}:END -->\n?", re.S)
+        if pat.search(text):
+            text = pat.sub("\n", text)
+            removed.append(b)
+    if removed:
+        claude_md.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
+    return removed
 
 
 def init(name: str | None, codebase: Path, hub: Path | None = None, today: date | None = None) -> dict:

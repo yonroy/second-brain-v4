@@ -33,7 +33,7 @@ class Base(unittest.TestCase):
         git(self.code, "init", "-q")
         git(self.code, "add", "-A")
         git(self.code, "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "base")
-        self.env = mock.patch.dict(os.environ, {"SECOND_BRAIN_V3_ROOT": str(self.hub)})
+        self.env = mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(self.hub)})
         self.env.start()
         self.result = init(None, self.code, self.hub)
         self.p = find_project("demo")
@@ -69,7 +69,7 @@ class InitTests(Base):
             self.assertTrue((self.hub / d).is_dir())
         self.assertLessEqual(len((root / "AGENTS.md").read_text(encoding="utf-8").splitlines()), 60)
         claude = (self.code / "CLAUDE.md").read_text(encoding="utf-8")
-        self.assertIn("SECOND-BRAIN-V3:START", claude)
+        self.assertIn("SECOND-BRAIN-V4:START", claude)
         self.assertIn(paths.fwd(root), claude)
         self.assertNotIn("{{", (root / "CONTEXT.md").read_text(encoding="utf-8"))
 
@@ -335,3 +335,47 @@ class HookInstallTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CoexistWithV3Tests(Base):
+    """ADR-009: a codebase that already has a v3 brain, then gets v4."""
+
+    V3 = Path("D:/SecondBrainV3/Brain/bin/brain.py")
+
+    def setUp(self):
+        if not self.V3.exists():
+            self.skipTest("V3 package not on this machine")
+        self.tmp = Path(tempfile.mkdtemp())
+        self.code = self.tmp / "svc"
+        self.code.mkdir()
+        git(self.code, "init", "-q")
+        env3 = {k: v for k, v in os.environ.items() if k != "SECOND_BRAIN_V4_ROOT"}
+        env3["SECOND_BRAIN_V3_ROOT"] = str(self.tmp / "h3")
+        subprocess.run([sys.executable, str(self.V3), "init"], cwd=self.code, env=env3, capture_output=True, check=True)
+        self.hub = self.tmp / "h4"
+        self.env = mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(self.hub)})
+        self.env.start()
+
+    def gens(self):
+        cfg = json.loads((self.code / ".claude" / "settings.local.json").read_text(encoding="utf-8"))
+        return sorted({("v3" if "secondbrainv3" in h["command"].lower() else "v4")
+                       for es in cfg["hooks"].values() for e in es for h in e["hooks"]})
+
+    def test_init_keeps_v3_hooks_relinks_skills_and_gate_flags(self):
+        rc, out = self.run_cli("init")
+        self.assertEqual(self.gens(), ["v3", "v4"], "v4 install must not drop v3 entries")
+        lam = (self.code / ".claude" / "skills" / "lam").resolve()
+        self.assertEqual(lam, (paths.PACKAGE / "skills" / "lam").resolve(), "skill links now point at v4")
+        self.assertTrue(any("SECOND-BRAIN-V3" in f.what for f in gate.check(find_project("svc"))))
+
+    def test_migrate_removes_v3_and_keeps_v4(self):
+        self.run_cli("init")
+        rc, out = self.run_cli("hooks", "migrate")
+        self.assertIn("SECOND-BRAIN-V3", out)
+        self.assertEqual(self.gens(), ["v4"])
+        from brain import hooks as h
+        self.assertTrue(all(h.status(self.code).values()))
+        claude = (self.code / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertNotIn("SECOND-BRAIN-V3", claude)
+        self.assertIn("SECOND-BRAIN-V4:START", claude)
+        self.assertEqual(gate.check(find_project("svc")), [])

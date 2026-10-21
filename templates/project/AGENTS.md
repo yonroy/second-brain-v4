@@ -1,4 +1,4 @@
-# {{NAME}} — Second Brain v3
+# {{NAME}} — Second Brain v4
 
 > Đầu phiên, hook đã chạy `brain start` để nạp CONTEXT, trap và quyết định. Không thấy khối đó thì tự chạy:
 > `{{BRAIN}} start`

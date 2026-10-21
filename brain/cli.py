@@ -6,7 +6,7 @@ import json
 import sys
 from pathlib import Path
 
-from brain import VERSION, gate, hooks, paths, session, skills, traps, verify
+from brain import GEN, VERSION, gate, hooks, paths, session, skills, traps, verify
 from brain.init import init
 from brain.project import ProjectNotFound, find_project
 
@@ -42,8 +42,16 @@ def cmd_hooks(a) -> int:
     p = _project(a)
     if a.action == "install":
         print(f"✅ đã cài hook → {hooks.install(p.codebase)}")
+    elif a.action == "migrate":
+        from brain.init import remove_legacy_blocks
+        blocks = remove_legacy_blocks(p.codebase / "CLAUDE.md")
+        n = hooks.remove_foreign(p.codebase)
+        hooks.install(p.codebase)
+        linked = skills.install(p.codebase)
+        print(f"✅ migrate: gỡ block {', '.join(blocks) or 'không có'} · gỡ {n} hook của thế hệ khác · "
+              f"cài lại hook v{GEN} · skill: " + ", ".join(f"{k} ({v})" for k, v in linked))
     elif a.action == "remove":
-        print(f"đã gỡ hook v3 khỏi {hooks.remove(p.codebase)}")
+        print(f"đã gỡ hook v{GEN} khỏi {hooks.remove(p.codebase)}")
     else:
         for ev, ok in hooks.status(p.codebase).items():
             print(f"{'✅' if ok else '❌'} {ev}")
@@ -65,7 +73,7 @@ def cmd_ingest(a) -> int:
         p = _project(a, session.read_hook_input() if a.hook else None)
         if p is None:
             return 0
-        codebase, name, version = p.codebase, p.name, str(a.version or p.config.get("version", 3))
+        codebase, name, version = p.codebase, p.name, str(a.version or p.config.get("version", GEN))
         roles, root, mcfg = p.config.get("roles", {}), p.root, p.config.get("metrics", {})
     patterns = mo.V2_READ_PATTERNS if (a.patterns or ("v2" if a.cwd else "v3")) == "v2" else mo.V3_READ_PATTERNS
     con = _db()
@@ -235,7 +243,7 @@ def main(argv=None) -> int:
     for s in (sys.stdout, sys.stderr):
         if hasattr(s, "reconfigure"):
             s.reconfigure(encoding="utf-8")
-    ap = argparse.ArgumentParser(prog="brain", description=f"Second Brain v3 ({VERSION}) · hub {paths.fwd(paths.hub())}")
+    ap = argparse.ArgumentParser(prog="brain", description=f"Second Brain v{GEN} ({VERSION}) · hub {paths.fwd(paths.hub())}")
     ap.add_argument("--project", help="tên project (mặc định: suy từ cwd)")
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -252,7 +260,7 @@ def main(argv=None) -> int:
     s.set_defaults(fn=cmd_skills)
 
     s = sub.add_parser("hooks", help="cài / gỡ / xem hook Claude Code của project")
-    s.add_argument("action", choices=["install", "remove", "status"], nargs="?", default="status")
+    s.add_argument("action", choices=["install", "remove", "status", "migrate"], nargs="?", default="status")
     s.set_defaults(fn=cmd_hooks)
 
     s = sub.add_parser("trap-check", help="in trap khớp với file / lệnh / prompt (PreToolUse hook)")

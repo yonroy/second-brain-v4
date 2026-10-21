@@ -35,11 +35,28 @@ def _link(src: Path, dst: Path) -> str:
     return "copy"
 
 
+def _other_brain(dst: Path) -> bool:
+    """dst links into another Second Brain package's skills/ (e.g. v3): safe to relink to ours."""
+    try:
+        target = dst.resolve()
+    except OSError:
+        return False
+    return target != dst and target.parent.name == "skills" and (target.parent.parent / "bin" / "brain.py").is_file()
+
+
 def _points_to(dst: Path, src: Path) -> bool:
     try:
         return dst.resolve() == src.resolve()
     except OSError:
         return False
+
+
+def _unlink(dst: Path) -> None:
+    """Remove a symlink or junction without touching its target."""
+    try:
+        dst.unlink()
+    except (IsADirectoryError, PermissionError, OSError):
+        os.rmdir(dst)  # Windows junctions are removed as empty directories
 
 
 def install(codebase: Path | None = None, global_: bool = False) -> list[tuple[str, str]]:
@@ -52,10 +69,13 @@ def install(codebase: Path | None = None, global_: bool = False) -> list[tuple[s
             if _points_to(dst, src):
                 done.append((name, "đã có"))
                 continue
-            if not (dst / ".brain-copy").exists():
+            if _other_brain(dst):
+                _unlink(dst)
+            elif not (dst / ".brain-copy").exists():
                 done.append((name, f"bỏ qua: {paths.fwd(dst)} đã tồn tại và không phải của brain"))
                 continue
-            shutil.rmtree(dst)  # our own stale copy: refresh it
+            else:
+                shutil.rmtree(dst)  # our own stale copy: refresh it
         how = _link(src, dst)
         if how == "copy":
             (dst / ".brain-copy").write_text("copied by brain skills install\n", encoding="utf-8")

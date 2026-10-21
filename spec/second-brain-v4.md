@@ -1,6 +1,6 @@
 # Second Brain v4 — Spec (delta trên v3)
 
-> Trạng thái: **DRAFT, chờ duyệt (pha 0)** · 2026-10-21 · package `D:\SecondBrainV4\Brain` v4.0.0-dev
+> Trạng thái: **ACCEPTED 2026-10-21** · 2026-10-21 · package `D:\SecondBrainV4\Brain` v4.0.0-dev
 > v4 = v3 (`spec/second-brain-v3.md`, vẫn còn hiệu lực ở mọi điểm không nêu dưới đây) + **lớp Recall**.
 > Quyết định nền: ADR-009 … ADR-012.
 

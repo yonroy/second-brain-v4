@@ -1,4 +1,4 @@
-"""A v3 project in the hub: config + parsers for its memory files (spec §4)."""
+"""A v4 project in the hub: config + parsers for its memory files (spec §4)."""
 from __future__ import annotations
 
 import re
@@ -216,5 +216,5 @@ def find_project(name: str | None = None, cwd: Path | None = None, h: Path | Non
             if here.startswith(r) and len(r) > best_len:  # deepest match wins (nested codebases)
                 best, best_len = p, len(r)
     if best is None:
-        raise ProjectNotFound(f"cwd {paths.fwd(cwd)} không thuộc project v3 nào. Chạy `brain init` hoặc thêm --project.")
+        raise ProjectNotFound(f"cwd {paths.fwd(cwd)} không thuộc project v4 nào. Chạy `brain init` hoặc thêm --project.")
     return best

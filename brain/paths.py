@@ -5,6 +5,8 @@ import os
 import re
 from pathlib import Path
 
+from brain import HUB_ENV
+
 PACKAGE = Path(__file__).resolve().parent.parent
 _DRIVE = re.compile(r"^([A-Za-z]):[\\/]")
 _MNT = re.compile(r"^/mnt/([a-z])/")
@@ -33,7 +35,7 @@ def same_path(a, b) -> bool:
 
 
 def hub() -> Path:
-    env = os.environ.get("SECOND_BRAIN_V3_ROOT", "").strip()
+    env = os.environ.get(HUB_ENV, "").strip()
     h = local(env) if env else PACKAGE.parent
     try:
         return h.resolve()  # one spelling everywhere (expands Windows 8.3 short names)

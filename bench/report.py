@@ -6,7 +6,7 @@ import statistics
 from collections import defaultdict
 from pathlib import Path
 
-ORDER = ["none", "v1", "v2", "v3"]
+ORDER = ["none", "v1", "v2", "v3", "v4"]
 
 
 def load_rows(paths: list[Path]) -> list[dict]:

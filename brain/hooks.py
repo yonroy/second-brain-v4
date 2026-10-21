@@ -1,4 +1,4 @@
-"""Install / remove the v3 hooks in a codebase's `.claude/settings.local.json` (ADR-004).
+"""Install / remove this generation's hooks in a codebase's `.claude/settings.local.json` (ADR-004).
 
 Local settings, not the shared settings.json: the hook commands point at this machine's hub.
 Our entries are recognised by the launcher path, so reinstalling is idempotent and other hooks
@@ -11,7 +11,7 @@ from pathlib import Path
 
 from brain import paths
 
-MARK = "/bin/brain.py"
+MARK = paths.fwd(paths.PACKAGE).lower() + "/bin/brain.py"  # package-specific: v3 and v4 hooks are told apart
 TOOL_MATCHER = "Read|Edit|Write|MultiEdit|NotebookEdit|Bash|PowerShell"
 
 
@@ -36,7 +36,7 @@ def settings_path(codebase: Path) -> Path:
 
 
 def _ours(entry: dict) -> bool:
-    return any(MARK in str(x.get("command", "")).replace("\\", "/") for x in entry.get("hooks", []))
+    return any(MARK in str(x.get("command", "")).replace("\\", "/").lower() for x in entry.get("hooks", []))
 
 
 def _load(f: Path) -> dict:
@@ -91,6 +91,35 @@ def remove(codebase: Path) -> str:
     cfg = _strip(_load(f))
     f.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
     return paths.fwd(f)
+
+
+def _foreign(entry: dict) -> bool:
+    """A hook of another Second Brain package (e.g. v3): runs some other .../bin/brain.py."""
+    cmds = [str(x.get("command", "")).replace("\\", "/").lower() for x in entry.get("hooks", [])]
+    return any("/bin/brain.py" in c and MARK not in c for c in cmds)
+
+
+def remove_foreign(codebase: Path) -> int:
+    """Drop hooks of other brain generations; v3's own `hooks remove` matches any brain.py and would take ours too."""
+    f = settings_path(codebase)
+    if not f.exists():
+        return 0
+    cfg = _load(f)
+    hooks = cfg.get("hooks") or {}
+    n = 0
+    for ev in list(hooks):
+        kept = [e for e in hooks[ev] if not _foreign(e)]
+        n += len(hooks[ev]) - len(kept)
+        if kept:
+            hooks[ev] = kept
+        else:
+            del hooks[ev]
+    if hooks:
+        cfg["hooks"] = hooks
+    else:
+        cfg.pop("hooks", None)
+    f.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    return n
 
 
 def status(codebase: Path) -> dict[str, bool]:

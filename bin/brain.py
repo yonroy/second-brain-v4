@@ -1,4 +1,4 @@
-"""Launcher usable from any cwd: python D:/SecondBrainV3/Brain/bin/brain.py <cmd>."""
+"""Launcher usable from any cwd: python D:/SecondBrainV4/Brain/bin/brain.py <cmd>."""
 import sys
 from pathlib import Path
 

@@ -1,6 +1,6 @@
 # ADR-012 — Quyết định theo liên quan thay cho in tất cả
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 `brain start` của v3 in mọi quyết định đang hiệu lực. Dự án thật có thể có hàng chục quyết định (AFE có 54 ADR).

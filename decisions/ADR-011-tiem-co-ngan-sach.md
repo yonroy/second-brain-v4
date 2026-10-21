@@ -1,6 +1,6 @@
 # ADR-011 — Tiêm context có ngân sách và sổ ghi
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 v3 là brain đắt nhất. Thêm recall sẽ làm tăng token nếu không có trần. Cognee dùng injection budget và ledger.

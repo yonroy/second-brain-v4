@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import date
 
+from brain import LEGACY_BLOCKS
 from brain.project import PROOF_OK, STORY_STATUS, STORY_TYPES, Project
 from brain.verify import cmd_hash, load_log
 
@@ -142,11 +143,18 @@ def _stories(p: Project) -> list[Finding]:
 
 
 def _legacy(p: Project) -> list[Finding]:
+    out = []
     dup = [d for d in ("MEMORY", "HARNESS") if (p.codebase / d).is_dir()]
     if dup:
-        return [Finding(RED, f"Codebase còn bản memory cũ: {', '.join(dup)}/",
-                        "chuyển nội dung cần giữ vào hub rồi xoá/đổi tên thư mục trong codebase (một sự thật, một chỗ)")]
-    return []
+        out.append(Finding(RED, f"Codebase còn bản memory cũ: {', '.join(dup)}/",
+                           "chuyển nội dung cần giữ vào hub rồi xoá/đổi tên thư mục trong codebase (một sự thật, một chỗ)"))
+    claude = p.codebase / "CLAUDE.md"
+    text = claude.read_text(encoding="utf-8", errors="ignore") if claude.is_file() else ""
+    old = [b for b in LEGACY_BLOCKS if f"<!-- {b}:START" in text]
+    if old:
+        out.append(Finding(RED, f"CLAUDE.md còn block {', '.join(old)} (hai thế hệ brain cùng chạy)",
+                           "chạy `brain hooks migrate` (gỡ block + hook của thế hệ cũ, link lại skill). Đừng dùng `hooks remove` của v3: nó gỡ cả hook v4"))
+    return out
 
 
 def summary(project: Project, findings: list[Finding]) -> str:

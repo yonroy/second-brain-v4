@@ -1,4 +1,4 @@
-"""python -m bench {list|validate|run|report}  — run from D:/SecondBrainV3/Brain."""
+"""python -m bench {list|validate|run|report}  — run from D:/SecondBrainV4/Brain."""
 from __future__ import annotations
 
 import argparse

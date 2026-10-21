@@ -1,6 +1,6 @@
 # ADR-010 — Lớp Recall bằng stdlib, tất định
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 Đã xem xét cognee (graph + vector, server, LLM). Rủi ro: không tất định, phụ thuộc nặng, tốn quota Claude ở local mode. Bench của v3 cho thấy đưa ra tất định thắng (T06: v2 0/3, v3 3/3). FTS5 có sẵn trên Windows (SQLite 3.50) và WSL (3.46).

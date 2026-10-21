@@ -119,7 +119,7 @@ class MaintenanceTests(unittest.TestCase):
         self.hub = self.tmp / "hub"
         self.code = self.tmp / "demo"
         self.code.mkdir()
-        self.env = mock.patch.dict(os.environ, {"SECOND_BRAIN_V3_ROOT": str(self.hub)})
+        self.env = mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(self.hub)})
         self.env.start()
         init(None, self.code, self.hub)
         self.p = find_project("demo")

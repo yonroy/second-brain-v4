@@ -19,7 +19,7 @@ from bench.brains.base import fwd
 from bench.tasks import Task
 
 PACKAGE = Path(__file__).resolve().parent.parent
-HUB = Path(os.environ.get("SECOND_BRAIN_V3_ROOT", PACKAGE.parent))
+HUB = Path(os.environ.get("SECOND_BRAIN_V4_ROOT", PACKAGE.parent))
 RUNS_ROOT = Path(os.environ.get("BRAINBENCH_DIR", "D:/_brainbench"))
 RESULTS_DIR = HUB / "_metrics" / "bench"
 CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"

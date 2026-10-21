@@ -59,8 +59,8 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(env.extra_env["SECOND_BRAIN_ROOT"], str(self.hub).replace("\\", "/"))
 
 
-class V3AdapterTests(unittest.TestCase):
-    def test_v3_renders_seed_hooks_and_skills(self):
+class V4AdapterTests(unittest.TestCase):
+    def test_v4_renders_seed_hooks_and_skills(self):
         import os
         from unittest import mock
         tmp = Path(tempfile.mkdtemp())
@@ -69,8 +69,8 @@ class V3AdapterTests(unittest.TestCase):
             work, hub = tmp / "work", tmp / "hub"
             shutil.copytree(task.repo, work)
             hub.mkdir()
-            with mock.patch.dict(os.environ, {"SECOND_BRAIN_V3_ROOT": str(hub)}):
-                env = get_brain("v3").setup(work, hub, task.seed())
+            with mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(hub)}):
+                env = get_brain("v4").setup(work, hub, task.seed())
                 from brain.project import find_project
                 p = find_project("ledger")
                 self.assertIn("ADR-004", [d.id for d in p.decisions()])
@@ -78,6 +78,28 @@ class V3AdapterTests(unittest.TestCase):
                 self.assertEqual(p.proofs()[0].id, "B-001")
             self.assertTrue((work / ".claude" / "settings.local.json").exists())
             self.assertTrue((work / ".claude" / "skills" / "lam" / "SKILL.md").exists())
+            self.assertEqual(env.extra_env["SECOND_BRAIN_V4_ROOT"], str(hub).replace("\\", "/"))
+            self.assertIn("SECOND-BRAIN-V4:START", (work / "CLAUDE.md").read_text(encoding="utf-8"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class V3RealPackageTests(unittest.TestCase):
+    def test_v3_adapter_runs_the_v3_package(self):
+        from bench.brains.v3 import V3_PACKAGE
+        if not (V3_PACKAGE / "bin" / "brain.py").exists():
+            self.skipTest("V3 package not on this machine")
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            task = select("T06")[0]
+            work, hub = tmp / "work", tmp / "hub"
+            shutil.copytree(task.repo, work)
+            hub.mkdir()
+            env = get_brain("v3").setup(work, hub, task.seed())
+            claude = (work / "CLAUDE.md").read_text(encoding="utf-8")
+            self.assertIn("SECOND-BRAIN-V3:START", claude)
+            self.assertIn("secondbrainv3/brain/bin/brain.py", (work / ".claude" / "settings.local.json").read_text(encoding="utf-8").lower())
+            self.assertIn("ADR-004", (hub / "_projects" / "ledger" / "decisions" / "INDEX.md").read_text(encoding="utf-8"))
             self.assertEqual(env.extra_env["SECOND_BRAIN_V3_ROOT"], str(hub).replace("\\", "/"))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)

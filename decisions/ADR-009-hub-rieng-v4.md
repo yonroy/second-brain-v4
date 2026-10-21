@@ -1,6 +1,6 @@
 # ADR-009 — Hub riêng D:\SecondBrainV4, package clone từ V3
 
-**Ngày:** 2026-10-21 · **Trạng thái:** proposed
+**Ngày:** 2026-10-21 · **Trạng thái:** accepted
 
 ## Context
 User chọn tách v4 khỏi v3 để so sánh được, giống lần tách v2 → v3. Bench cần chạy được v3 thật song song với v4.
