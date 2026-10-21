@@ -262,15 +262,26 @@ Chi tiết cách chạy: `bench/README.md`.
   - `claim_unbacked`: nói pass/xanh mà không có lệnh test (Bash/PowerShell);
   - `cost_usd`, `duration_s`, `tokens_in/out`, `turns`.
 - `python -m bench report <jsonl…>` in trung bình ± độ lệch theo brain và ma trận pass theo task. Kết quả lưu ở `_metrics/bench/<ngày>-<label>.jsonl`.
-- **8 task:**
-  - T01: file sinh tự động (trap);
-  - T02: slugify có đ/Đ (trap + proof);
-  - T03: dùng fact API nội bộ;
-  - T04: fact cổng DB quá hạn;
-  - T05: ghi bài học cuối phiên;
-  - T06: ADR tiền int + half-up;
-  - T07: retry idempotent;
-  - T08: đổi tên API, xoá tên cũ (ADR).
+- **16 task.**
+  - Bộ cơ bản:
+    - T01: file sinh tự động (trap);
+    - T02: slugify có đ/Đ;
+    - T03: dùng fact về API nội bộ;
+    - T04: fact cổng DB quá hạn;
+    - T05: ghi bài học cuối phiên;
+    - T06: ADR tiền int + half-up;
+    - T07: retry idempotent;
+    - T08: đổi tên API, xoá tên cũ.
+  - Bộ khó (thêm ngày 2026-10-21). Seed có thêm trap và quyết định gây nhiễu, để brain phải tự tìm đúng thông tin:
+    - T09: CSV cho kế toán, cần nhiều quy ước cùng lúc;
+    - T10: quyết định mới thay quyết định cũ, trong khi code mẫu bên cạnh vẫn theo cách cũ;
+    - T11: chạy test kiểu ngây thơ sẽ xoá `prod.db`;
+    - T12: đổi tên handler có tham chiếu bằng chuỗi trong `data/*.json`;
+    - T13: phân trang có `next` không bao giờ rỗng, cộng retry;
+    - T14: sắp xếp tiếng Việt, phải ghi lại bài học;
+    - T15: hợp đồng lỗi kiểu Result, trong khi ví dụ gần nhất lại raise;
+    - T16: mã giảm giá nhiều bước, có ADR làm tròn và bẫy áp mã hai lần.
+- Quyết định trong seed có `status` (`active` / `superseded by …`). Mỗi adapter hiển thị trạng thái này theo định dạng của version mình.
 
 ## 10. Module
 

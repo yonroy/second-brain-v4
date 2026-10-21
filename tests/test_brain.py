@@ -195,6 +195,15 @@ class SessionTests(Base):
         self.assertIn("Codebase ở", out)
         self.assertTrue(self.p.file(".state/sess-12345678.json").exists())
 
+    def test_start_flags_stale_fact_on_its_line(self):
+        self.write("CONTEXT.md", "# c\n## Môi trường\n- DB ở db.local:5432 [2025-03-02|user]\n"
+                                 f"- Test bằng unittest [{TODAY}|file:README.md]\n- không tag\n")
+        rc, out = self.run_cli("start")
+        line = next(l for l in out.splitlines() if "5432" in l)
+        self.assertIn("QUÁ HẠN", line)
+        self.assertNotIn("⚠️", next(l for l in out.splitlines() if "Test bằng unittest" in l))
+        self.assertIn("CHƯA KIỂM", next(l for l in out.splitlines() if "không tag" in l))
+
     def test_hook_outside_project_is_silent(self):
         rc, out = self.run_cli("start", "--hook", stdin=self.hook(), cwd=self.tmp)
         self.assertEqual((rc, out), (0, ""))

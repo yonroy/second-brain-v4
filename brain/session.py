@@ -80,6 +80,23 @@ def _save_state(p: Project, sid: str, st: dict) -> None:
 
 
 # ---------------------------------------------------------------- start
+def _context_lines(p: Project) -> list[str]:
+    """CONTEXT as the agent sees it, with every stale or untagged fact flagged on its own line.
+
+    Bench 2026-10-21 (T04 r3): gate only said "3 fact quá 30 ngày"; the agent trusted a 2025 port number on the
+    unmarked line and skipped the config file. The warning has to sit next to the number it is about."""
+    stale_days = p.limit("fact_stale_days", 30)
+    flags = {}
+    for f in p.facts():
+        if f.date is None:
+            flags[f.line_no] = "  ⚠️ CHƯA KIỂM (không có [ngày|nguồn]): xác minh trên repo trước khi dùng"
+        elif (date.today() - f.date).days > stale_days:
+            flags[f.line_no] = (f"  ⚠️ QUÁ HẠN ({(date.today() - f.date).days} ngày): đối chiếu repo/config trước khi dùng, "
+                                "sai thì sửa CONTEXT")
+    lines = p.read_parsed("CONTEXT.md").splitlines()
+    return [l + flags.get(i, "") for i, l in enumerate(lines, 1) if l.strip() and not l.startswith(">")]
+
+
 def start_text(p: Project, hook: dict | None = None, max_traps: int = 5) -> str:
     hook = hook or {}
     sid = str(hook.get("session_id") or "manual")
@@ -87,8 +104,7 @@ def start_text(p: Project, hook: dict | None = None, max_traps: int = 5) -> str:
     findings = gate.check(p)
     out = [f"=== brain start · {p.name} · {date.today().isoformat()} ===", gate.summary(p, findings)]
     out += [f"  {f}" for f in findings if f.level == gate.RED]
-    ctx = [l for l in p.read("CONTEXT.md").splitlines() if not l.startswith(">")]
-    out += ["", f"--- CONTEXT ({paths.fwd(p.file('CONTEXT.md'))}) ---", *[l for l in ctx if l.strip()]]
+    out += ["", f"--- CONTEXT ({paths.fwd(p.file('CONTEXT.md'))}) ---", *_context_lines(p)]
     active = [d for d in p.decisions() if d.status.startswith("active")]
     if active:
         out += ["", "--- Quyết định đang hiệu lực (decisions/INDEX.md) — làm theo, không làm ngược ---"]
