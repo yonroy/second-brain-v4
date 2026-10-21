@@ -2,7 +2,7 @@ import time
 
 from src import supplier
 
-TTL = 60
+TTL = 15
 _cache = {}
 
 

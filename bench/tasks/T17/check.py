@@ -16,7 +16,7 @@ s.fetch_price = fake
 from src import pricing
 a = pricing.get_price("A"); clock[0] += 10; b = pricing.get_price("A")
 cached = len(calls) == 1
-prices["A"] = 120; clock[0] += 51; c = pricing.get_price("A")
+prices["A"] = 120; clock[0] += 6; c = pricing.get_price("A")  # 16s after the first fetch
 print(a, b, c, cached)
 """
 

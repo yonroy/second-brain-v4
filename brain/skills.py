@@ -28,7 +28,8 @@ def _link(src: Path, dst: Path) -> str:
     except OSError:
         pass
     if os.name == "nt":
-        r = subprocess.run(["cmd", "/c", "mklink", "/J", str(dst), str(src)], capture_output=True, text=True)
+        r = subprocess.run(["cmd", "/c", "mklink", "/J", str(dst), str(src)], capture_output=True, text=True,
+                           encoding="oem", errors="replace")  # cmd prints in the OEM code page, not UTF-8
         if r.returncode == 0:
             return "junction"
     shutil.copytree(src, dst)

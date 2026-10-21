@@ -367,6 +367,6 @@ files = ["src/feature_flags.py"]
 [[history]]
 kind = "journal"
 date = "2026-07-12"
-text = "- Mục tiêu: tăng tốc get_price\n- Đã thử `functools.lru_cache` cho get_price → phải revert: giá đổi trong ngày nhưng khách thấy giá cũ tới tối (ticket #88).\n- Quy ước chốt với PM: cache giá tối đa **60 giây** (TTL), đo bằng `time.monotonic()` để test giả lập đồng hồ được.\n- Code đã sửa: src/pricing.py (đã revert)"
+text = "- Mục tiêu: tăng tốc get_price\n- Đã thử `functools.lru_cache` cho get_price → phải revert: giá đổi trong ngày nhưng khách thấy giá cũ tới tối (ticket #88).\n- Quy ước chốt với PM: cache giá tối đa **15 giây** (TTL) — giá flash-sale đổi theo từng phút, đo bằng `time.monotonic()` để test giả lập đồng hồ được.\n- Code đã sửa: src/pricing.py (đã revert)"
 files = ["src/pricing.py"]
 ref = "toi-uu-gia"

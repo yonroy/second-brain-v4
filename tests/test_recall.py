@@ -42,7 +42,7 @@ class HistoryTests(unittest.TestCase):
         self.tmp, p = staged("T17")
         hits = history.search(p, "cache get_price lru_cache")
         self.assertEqual(hits[0].kind, "journal")
-        self.assertIn("60 giây", hits[0].text)
+        self.assertIn("15 giây", hits[0].text)
 
     def test_commit_reason_for_file(self):
         self.tmp, p = staged("T19")
@@ -139,7 +139,7 @@ class SurfaceTests(unittest.TestCase):
         from brain.recall import surface
         self.tmp, p = staged("T22")
         text = surface.context_for_prompt(p, {"session_id": "s", "prompt": "Thêm weekly_totals tổng doanh thu theo tuần cho khách ACME"})
-        self.assertIn("ISO", text)
+        self.assertIn("Chủ nhật", text)
 
     def test_start_lists_few_decisions_when_many(self):
         from brain.recall import surface

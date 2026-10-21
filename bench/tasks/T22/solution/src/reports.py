@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import timedelta
 
 
 def daily_totals(rows):
@@ -12,6 +13,6 @@ def daily_totals(rows):
 def weekly_totals(rows):
     out = defaultdict(int)
     for r in rows:
-        y, w, _ = r["day"].isocalendar()
-        out[f"{y}-W{w:02d}"] += r["amount"]
+        start = r["day"] - timedelta(days=(r["day"].weekday() + 1) % 7)  # back to Sunday
+        out[start.isoformat()] += r["amount"]
     return dict(out)

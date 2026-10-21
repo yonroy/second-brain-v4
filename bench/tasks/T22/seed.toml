@@ -367,6 +367,6 @@ files = ["src/feature_flags.py"]
 [[history]]
 kind = "transcript"
 date = "2026-05-20"
-text = "- Mục tiêu: chốt định dạng báo cáo với ACME\n- Khách ACME (chị Lan, kế toán) yêu cầu: tuần tính **từ thứ Hai đến Chủ nhật theo tuần ISO**, nhãn tuần dạng `2026-W05` (năm ISO, số tuần 2 chữ số). Ngày 2026-01-01 thuộc tuần `2026-W01`.\n- Chưa code, để lúc làm weekly_totals."
+text = "- Mục tiêu: chốt định dạng báo cáo với ACME\n- Khách ACME (chị Lan, kế toán) yêu cầu: tuần tính **từ Chủ nhật đến thứ Bảy** (lịch Mỹ của công ty mẹ), nhãn tuần là **ngày Chủ nhật đầu tuần** dạng `YYYY-MM-DD` (ví dụ tuần chứa 2026-01-05 có nhãn `2026-01-04`). Không dùng tuần ISO.\n- Chưa code, để lúc làm weekly_totals."
 files = []
 ref = "acme-dinh-dang"

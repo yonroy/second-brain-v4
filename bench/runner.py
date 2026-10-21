@@ -25,6 +25,10 @@ RESULTS_DIR = HUB / "_metrics" / "bench"
 CLAUDE_PROJECTS = Path.home() / ".claude" / "projects"
 
 
+class QuotaExhausted(RuntimeError):
+    """The agent account hit its usage limit: every further run would be a fake failure."""
+
+
 @dataclass
 class RunSpec:
     task: Task
@@ -98,10 +102,15 @@ def run_one(spec: RunSpec, batch_dir: Path, timeout: int) -> dict:
         markers = [fwd(p).lower() for p in mem_paths] + [f"_projects/{seed.name}/".lower()] * bool(mem_paths)
         row.update(score.score_run(events, markers, before, after, task.memory_keywords, has_memory=bool(mem_paths)))
         row["wall_s"] = round(time.time() - t0, 1)
+        res = score.final_result(events)
+        if res.get("api_error_status") == 429 or "hit your session limit" in str(res.get("result", "")):
+            raise QuotaExhausted(str(res.get("result", "429")))
         row.update({k: v for k, v in task.check(work, events).items()})
         stderr = (run_dir / "stderr.txt").read_text(encoding="utf-8", errors="replace")
         row["error"] = (f"timeout {timeout}s" if timed_out else
                         None if row.get("ok") else f"agent rc={rc}: {stderr[-300:]}")
+    except QuotaExhausted:
+        raise
     except Exception as e:
         row.update({"ok": False, "pass": False, "error": f"{type(e).__name__}: {e}"[:600]})
     finally:
@@ -120,10 +129,19 @@ def run_batch(tasks: list[Task], brains: list[str], repeats: int, model: str, la
     specs = [RunSpec(t, b, r, model) for r in range(1, repeats + 1) for t in tasks for b in brains]
     lock = threading.Lock()
     done = 0
+    stop = threading.Event()
 
     def work(spec: RunSpec) -> None:
         nonlocal done
-        row = run_one(spec, batch_dir, timeout)
+        if stop.is_set():
+            return
+        try:
+            row = run_one(spec, batch_dir, timeout)
+        except QuotaExhausted as e:
+            if not stop.is_set():
+                stop.set()
+                print(f"⛔ dừng batch: hết quota agent ({e}). Lượt này và các lượt còn lại không được ghi.", flush=True)
+            return
         with lock:
             with out.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(row, ensure_ascii=False) + "\n")

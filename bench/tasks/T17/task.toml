@@ -1,5 +1,5 @@
 id = "T17"
-title = "Bài học cũ trong journal: cache giá phải có TTL 60s"
+title = "Bài học cũ trong journal: cache giá phải có TTL 15s"
 kind = "history"
 prompt = "`get_price` đang chậm vì mỗi lần gọi đều hỏi API nhà cung cấp. Thêm cache để nhanh hơn."
 memory_keywords = ["get_price", "TTL", "cache"]

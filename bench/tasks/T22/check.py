@@ -10,7 +10,7 @@ rows = [{"day": date(2026, 1, 4), "amount": 1}, {"day": date(2026, 1, 5), "amoun
         {"day": date(2026, 1, 12), "amount": 8}, {"day": date(2025, 12, 29), "amount": 16}]
 print(json.dumps(weekly_totals(rows), sort_keys=True))
 """
-WANT = {"2026-W01": 17, "2026-W02": 6, "2026-W03": 8}
+WANT = {"2025-12-28": 16, "2026-01-04": 3, "2026-01-11": 12}
 
 
 def check(work, events):
