@@ -9,7 +9,7 @@ Package cho hub `D:\SecondBrainV3` (hub v2 ở `D:\SecondBrainV2` vẫn chạy s
 - ✅ pha 0: spec;
 - ✅ pha 1: benchmark;
 - ✅ pha 2: CLI core;
-- ⏳ pha 3: hook (`trap-check`, cài `.claude/settings.json`);
+- ✅ pha 3: hook cho Claude Code và omp;
 - ⏳ pha 4: lớp thực thi;
 - ⏳ pha 5: stats;
 - ⏳ pha 6: bench v3;
@@ -32,6 +32,13 @@ bin\brain.cmd <lệnh>                                # cmd / PowerShell
 | `verify [B-ID…]` | Chạy `cmd` trong PROOF.md, ghi `✅/❌ ngày commit` và một dòng vào `_metrics/verify.jsonl`. |
 | `start [--hook]` | In gate, CONTEXT, các quyết định đang hiệu lực, 5 trap gần nhất và story đang làm. Ghi lại trạng thái đầu phiên. |
 | `end [--check] [--hook]` | Sinh `journal/<ngày>-<sid>.md` từ transcript. `--check`: code đổi mà memory chưa đổi thì trả `{"decision":"block"}`, tối đa một lần mỗi phiên. |
+| `trap-check [path\|lệnh] [--hook] [--prompt]` | In trap có `trigger` khớp (path glob hoặc `kw:`). Ở chế độ hook, mỗi trap chỉ báo một lần mỗi phiên. |
+| `hooks [install\|remove\|status]` | Cài, gỡ hoặc xem hook trong `<codebase>/.claude/settings.local.json`. `init` cài sẵn; thêm `--no-hooks` nếu không muốn. |
+
+## Hook
+
+- **Claude Code:** `brain init` cài sẵn 4 hook: SessionStart, UserPromptSubmit, PreToolUse, Stop. Xem spec §6.
+- **omp** (WSL): `omp --hook /mnt/d/SecondBrainV3/Brain/hooks/omp/brain-v3.ts …`. Extension gọi cùng CLI bằng `python3` (đổi bằng env `BRAIN_PYTHON`). Muốn nạp mặc định thì thêm file này vào danh sách extension trong cấu hình omp.
 
 Project được suy ra từ cwd: nằm trong codebase hoặc trong `_projects/<p>` là đủ. Có thể chỉ định bằng `--project <tên>`. Hub lấy từ env `SECOND_BRAIN_V3_ROOT`, mặc định là thư mục cha của package.
 

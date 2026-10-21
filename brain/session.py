@@ -7,6 +7,7 @@ end    writes journal/<date>-<sid8>.md from the transcript; with --check it asks
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import time
@@ -159,7 +160,7 @@ def write_journal(p: Project, sid: str, st: dict | None, hook: dict) -> Path:
     verified = [f"{e['id']} {'✅' if e['ok'] else '❌'}" for e in load_log(p)
                 if started and _ts(e.get("ts")) >= started]
     rel = lambda f: f.split("/")[-1]  # noqa: E731
-    lines = [f"# {date.today().isoformat()} · phiên {sid[:8]}", ""]
+    lines = [f"# {date.today().isoformat()} · phiên {short_sid(sid)}", ""]
     if dg["goal"]:
         lines.append(f"- Mục tiêu: {dg['goal']}")
     if dg["code_files"]:
@@ -174,10 +175,16 @@ def write_journal(p: Project, sid: str, st: dict | None, hook: dict) -> Path:
     dirty = len([l for l in _git(p, "status", "--porcelain").splitlines() if l.strip()])
     lines.append(f"- Commit: {((st or {}).get('head') or '?')[:7]} → {head or '?'}; chưa commit: {dirty} file")
     lines.append(f"- {gate.summary(p, gate.check(p))}")
-    out = p.file("journal") / f"{date.today().isoformat()}-{sid[:8]}.md"
+    out = p.file("journal") / f"{date.today().isoformat()}-{short_sid(sid)}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines[:15]) + "\n", encoding="utf-8", newline="\n")
     return out
+
+
+def short_sid(sid: str) -> str:
+    """8 chars that differ between sessions: uuid prefix for Claude, the time tail for omp-<pid>-<ms>."""
+    clean = re.sub(r"[^A-Za-z0-9]", "", sid)
+    return clean[:8] if re.match(r"^[0-9a-f]{8}-", sid) else clean[-8:]
 
 
 def _ts(s) -> float:
@@ -198,6 +205,7 @@ def end(p: Project, hook: dict, check: bool) -> dict:
             _save_state(p, sid, st)
             return {"block": (f"Code trong {paths.fwd(p.codebase)} đã đổi nhưng memory của {p.name} chưa cập nhật. "
                               f"Trước khi dừng: sửa {paths.fwd(p.file('CONTEXT.md'))} (Đang làm / Việc tiếp theo, "
-                              "fact có [ngày|nguồn]); lỗi/bẫy mới → TRAPS.md; quyết định → decisions/INDEX.md; "
+                              "fact có [ngày|nguồn]; việc đã xong thì xoá khỏi Đang làm, không ghi thêm vào đó; "
+                              "điều đã học về hệ thống thì ghi vào Môi trường / Kiến trúc); lỗi/bẫy mới → TRAPS.md; quyết định → decisions/INDEX.md; "
                               "behavior đổi → `brain verify <B-ID>`. Không có gì đáng ghi thì nói rõ lý do rồi dừng.")}
     return {"journal": paths.fwd(write_journal(p, sid, st, hook))}

@@ -1,6 +1,6 @@
 # {{NAME}} — TRAPS
 
-> Bẫy và lỗi đã gặp. Hook nạp trap khi agent chạm vào `trigger` (pha 3).
+> Bẫy và lỗi đã gặp. Hook nạp trap khi agent chạm vào `trigger` (đọc/sửa file khớp glob, lệnh hoặc prompt chứa từ khoá).
 > `trigger`: path glob và/hoặc `kw:<từ khoá>`. `enforce`: `none` hoặc `lint:<tên>` · `test:<path>` · `hook:<tên>` khi đã lên bậc 3.
 
 <!-- Mẫu:

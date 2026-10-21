@@ -206,7 +206,7 @@ class SessionTests(Base):
         self.assertEqual(json.loads(out)["decision"], "block")
         rc, out = self.run_cli("end", "--check", "--hook", stdin=self.hook())
         self.assertEqual(out, "", "second stop must not block again")
-        self.assertTrue(any(self.p.file("journal").glob("*-sess-123.md")))
+        self.assertTrue(any(self.p.file("journal").glob("*-12345678.md")))
 
     def test_stop_allows_when_memory_updated(self):
         self.run_cli("start", "--hook", stdin=self.hook())
@@ -234,6 +234,83 @@ class SessionTests(Base):
         self.assertIn("Memory đã sửa: TRAPS.md", j)
         self.assertIn("python -m unittest discover", j)
         self.assertLessEqual(len(j.splitlines()), 15)
+
+
+class TrapTests(Base):
+    def setUp(self):
+        super().setUp()
+        self.write("TRAPS.md", "## M-002 Sửa tay models.py bị ghi đè\ntrigger: src/models.py, schema/*\n"
+                               "seen: 2026-10-08\nfix: sửa schema rồi chạy tools/gen.py\n\n"
+                               "## M-007 Retry ghi trùng\ntrigger: kw:INSERT\nseen: 2026-10-11\nfix: upsert theo order_id\n")
+
+    def call(self, tool_input=None, prompt=None, sid="s1"):
+        hook = {"session_id": sid, "cwd": str(self.code)}
+        argv = ["trap-check", "--hook"]
+        if prompt is not None:
+            hook["prompt"] = prompt
+            argv.append("--prompt")
+        else:
+            hook["tool_input"] = tool_input
+        rc, out = self.run_cli(*argv, stdin=json.dumps(hook), cwd=self.tmp)
+        return json.loads(out)["hookSpecificOutput"]["additionalContext"] if out.strip() else ""
+
+    def test_path_glob_absolute_and_relative(self):
+        ctx = self.call({"file_path": str(self.code / "src" / "models.py")})
+        self.assertIn("M-002", ctx)
+        self.assertIn("tools/gen.py", ctx)
+        self.assertIn("M-002", self.call({"file_path": "schema/user.json"}, sid="s2"))
+        self.assertEqual(self.call({"file_path": str(self.code / "app.py")}, sid="s3"), "")
+
+    def test_keyword_in_command_and_edit_content(self):
+        self.assertIn("M-007", self.call({"command": "sqlite3 db 'insert into orders'"}))
+        self.assertIn("M-007", self.call({"file_path": "src/store.py", "new_string": "conn.execute('INSERT INTO t')"}, sid="s9"))
+
+    def test_once_per_session(self):
+        self.assertIn("M-002", self.call({"file_path": "src/models.py"}))
+        self.assertEqual(self.call({"file_path": "src/models.py"}), "")
+        self.assertIn("M-002", self.call({"file_path": "src/models.py"}, sid="other"))
+
+    def test_prompt_keywords(self):
+        self.assertIn("M-007", self.call(prompt="viết loader dùng INSERT vào bảng orders"))
+
+    def test_template_example_in_comment_is_not_a_trap(self):
+        self.write("TRAPS.md", "# t\n<!-- Mẫu:\n## M-001 Tên bẫy ngắn\ntrigger: src/models.py\n-->\n")
+        self.assertEqual(self.p.traps(), [])
+
+    def test_manual_mode(self):
+        rc, out = self.run_cli("trap-check", "src/models.py")
+        self.assertIn("M-002", out)
+
+
+class HookInstallTests(Base):
+    def test_install_merges_and_is_idempotent(self):
+        f = self.code / ".claude" / "settings.local.json"
+        f.parent.mkdir()
+        f.write_text(json.dumps({"permissions": {"allow": ["Bash(ls:*)"]},
+                                 "hooks": {"Stop": [{"hooks": [{"type": "command", "command": "echo mine"}]}]}}),
+                     encoding="utf-8")
+        from brain import hooks
+        hooks.install(self.code)
+        hooks.install(self.code)
+        cfg = json.loads(f.read_text(encoding="utf-8"))
+        self.assertEqual(cfg["permissions"]["allow"], ["Bash(ls:*)"])
+        cmds = [h["command"] for e in cfg["hooks"]["Stop"] for h in e["hooks"]]
+        self.assertEqual(len(cmds), 2, cmds)
+        self.assertIn("echo mine", cmds)
+        self.assertTrue(all(hooks.status(self.code).values()))
+        self.assertIn(".claude/settings.local.json", (self.code / ".git" / "info" / "exclude").read_text(encoding="utf-8"))
+        hooks.remove(self.code)
+        cfg = json.loads(f.read_text(encoding="utf-8"))
+        self.assertEqual([h["command"] for e in cfg["hooks"]["Stop"] for h in e["hooks"]], ["echo mine"])
+        self.assertNotIn("PreToolUse", cfg["hooks"])
+
+    def test_cli_init_installs_hooks(self):
+        other = self.tmp / "code" / "svc"
+        other.mkdir()
+        rc, out = self.run_cli("init", "--path", str(other), cwd=other)
+        self.assertIn("hooks Claude Code", out)
+        from brain import hooks
+        self.assertTrue(all(hooks.status(other).values()))
 
 
 if __name__ == "__main__":

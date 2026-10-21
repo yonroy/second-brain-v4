@@ -13,6 +13,7 @@ FACT_TAG = re.compile(r"\[(\d{4}-\d{2}-\d{2})\|([^\]]+)\]\s*$")
 TRAP_HEAD = re.compile(r"^##\s+(M-\d+)\s+(.*)$")
 STORY_STATUS = {"todo", "doing", "done", "dropped"}
 STORY_TYPES = {"tiny", "normal", "high-risk"}
+HTML_COMMENT = re.compile(r"<!--.*?-->", re.S)
 PROOF_OK = re.compile(r"^(✅|❌)\s+(\d{4}-\d{2}-\d{2})\s+([0-9a-f]{7,40}|nogit)$")
 
 
@@ -90,10 +91,14 @@ class Project:
         p = self.file(rel)
         return p.read_text(encoding="utf-8") if p.exists() else ""
 
+    def read_parsed(self, rel: str) -> str:
+        """File text with HTML comments blanked (line numbers kept), so template examples are not data."""
+        return HTML_COMMENT.sub(lambda m: "\n" * m.group(0).count("\n"), self.read(rel))
+
     # ---- CONTEXT ----
     def facts(self) -> list[Fact]:
         out, section = [], ""
-        for i, line in enumerate(self.read("CONTEXT.md").splitlines(), 1):
+        for i, line in enumerate(self.read_parsed("CONTEXT.md").splitlines(), 1):
             if line.startswith("## "):
                 section = line[3:].strip()
             elif line.lstrip().startswith("- ") and section:
@@ -111,7 +116,7 @@ class Project:
     # ---- TRAPS ----
     def traps(self) -> list[Trap]:
         traps, cur = [], None
-        for line in self.read("TRAPS.md").splitlines():
+        for line in self.read_parsed("TRAPS.md").splitlines():
             m = TRAP_HEAD.match(line)
             if m:
                 cur = Trap(m.group(1), m.group(2).strip())
@@ -134,7 +139,7 @@ class Project:
     # ---- PROOF ----
     def proofs(self) -> list[ProofRow]:
         rows = []
-        for i, line in enumerate(self.read("PROOF.md").splitlines(), 1):
+        for i, line in enumerate(self.read_parsed("PROOF.md").splitlines(), 1):
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
             if len(cells) >= 4 and re.fullmatch(r"B-\d+", cells[0]):
                 rows.append(ProofRow(i, cells[0], cells[1], cells[2].strip("`").strip(), cells[3]))
@@ -151,7 +156,7 @@ class Project:
     # ---- decisions/ ----
     def decisions(self) -> list[Decision]:
         out = []
-        for line in self.read("decisions/INDEX.md").splitlines():
+        for line in self.read_parsed("decisions/INDEX.md").splitlines():
             cells = [c.strip() for c in line.strip().strip("|").split("|")]
             if len(cells) >= 4:
                 m = re.search(r"(ADR-\d+|D-\d+)", cells[0])

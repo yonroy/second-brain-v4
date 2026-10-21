@@ -6,28 +6,59 @@ import json
 import sys
 from pathlib import Path
 
-from brain import VERSION, gate, paths, session, verify
+from brain import VERSION, gate, hooks, paths, session, traps, verify
 from brain.init import init
 from brain.project import ProjectNotFound, find_project
 
 
-def _project(a):
+def _project(a, hook: dict | None = None):
+    cwd = Path(paths.local(hook["cwd"])) if hook and hook.get("cwd") else None
     try:
-        return find_project(a.project)
+        return find_project(a.project, cwd=cwd)
     except ProjectNotFound as e:
-        if getattr(a, "quiet_missing", False):
-            return None
+        if getattr(a, "hook", False):
+            return None  # a hook in a repo without a v3 brain stays silent and never breaks the session
         raise SystemExit(f"❌ {e}")
 
 
 def cmd_init(a) -> int:
-    r = init(a.name, Path(a.path or Path.cwd()))
+    codebase = Path(a.path or Path.cwd())
+    r = init(a.name, codebase)
     print(f"✅ brain init → {r['project']}")
     for f in r["created"]:
         print(f"  + {f}")
     print(f"  CLAUDE.md: {r['claude_md']}")
+    if not a.no_hooks:
+        print(f"  hooks Claude Code: {hooks.install(codebase.resolve())}")
     if r["legacy"]:
         print(f"  ⚠ Codebase còn {', '.join(r['legacy'])}/ của v1/v2: chuyển phần cần giữ vào hub rồi xoá (gate sẽ báo 🔴).")
+    return 0
+
+
+def cmd_hooks(a) -> int:
+    p = _project(a)
+    if a.action == "install":
+        print(f"✅ đã cài hook → {hooks.install(p.codebase)}")
+    elif a.action == "remove":
+        print(f"đã gỡ hook v3 khỏi {hooks.remove(p.codebase)}")
+    else:
+        for ev, ok in hooks.status(p.codebase).items():
+            print(f"{'✅' if ok else '❌'} {ev}")
+    return 0
+
+
+def cmd_trap_check(a) -> int:
+    hook = session.read_hook_input() if a.hook else {}
+    if not a.hook:  # manual: brain trap-check <path-or-text>
+        hook = {"tool_input": {"file_path": a.target, "command": a.target}, "prompt": a.target}
+    p = _project(a, hook)
+    if p is None:
+        return 0
+    out = traps.check(p, hook, prompt_mode=a.prompt)
+    if out:
+        print(out)
+    elif not a.hook:
+        print("(không có trap khớp)")
     return 0
 
 
@@ -42,18 +73,16 @@ def cmd_gate(a) -> int:
 
 def cmd_start(a) -> int:
     hook = session.read_hook_input() if a.hook else {}
-    a.quiet_missing = a.hook
-    p = _project(a)
+    p = _project(a, hook)
     if p is None:
-        return 0  # hook in a repo that has no v3 brain: say nothing, never break the session
+        return 0
     print(session.start_text(p, hook))
     return 0
 
 
 def cmd_end(a) -> int:
     hook = session.read_hook_input() if a.hook else {}
-    a.quiet_missing = a.hook
-    p = _project(a)
+    p = _project(a, hook)
     if p is None:
         return 0
     r = session.end(p, hook, a.check)
@@ -93,7 +122,18 @@ def main(argv=None) -> int:
     s = sub.add_parser("init", help="tạo brain cho một codebase")
     s.add_argument("--name")
     s.add_argument("--path", help="codebase (mặc định: cwd)")
+    s.add_argument("--no-hooks", action="store_true", help="không cài hook Claude Code")
     s.set_defaults(fn=cmd_init)
+
+    s = sub.add_parser("hooks", help="cài / gỡ / xem hook Claude Code của project")
+    s.add_argument("action", choices=["install", "remove", "status"], nargs="?", default="status")
+    s.set_defaults(fn=cmd_hooks)
+
+    s = sub.add_parser("trap-check", help="in trap khớp với file / lệnh / prompt (PreToolUse hook)")
+    s.add_argument("target", nargs="?", default="", help="đường dẫn hoặc đoạn lệnh (khi chạy tay)")
+    s.add_argument("--hook", action="store_true")
+    s.add_argument("--prompt", action="store_true", help="hook UserPromptSubmit: khớp từ khoá trong prompt")
+    s.set_defaults(fn=cmd_trap_check)
 
     s = sub.add_parser("gate", help="kiểm sức khoẻ memory")
     s.add_argument("--strict", action="store_true", help="exit 1 khi có 🔴")

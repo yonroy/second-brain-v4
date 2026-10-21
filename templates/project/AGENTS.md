@@ -40,4 +40,4 @@
 | Story có `status` hợp lệ; `done` thì proof đã ✅ | `brain gate` |
 | Không có MEMORY/HARNESS trùng trong codebase | `brain gate` |
 | Cập nhật memory cuối phiên | Stop hook `brain end --check` |
-| Trap được nạp đúng lúc | PreToolUse `brain trap-check` (chưa có, pha 3) |
+| Trap được nạp đúng lúc | PreToolUse + UserPromptSubmit `brain trap-check` |

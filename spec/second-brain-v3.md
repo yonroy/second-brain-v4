@@ -161,16 +161,29 @@ Chạy bằng `python -m brain` (Windows) hoặc `python3 -m brain` (WSL). Packa
 
 ## 6. Hook (ADR-004)
 
+`brain init` cài hook vào `<codebase>/.claude/settings.local.json`. File này được thêm vào `.git/info/exclude`, vì lệnh hook trỏ tới hub riêng của từng máy. Lệnh `brain hooks install|remove|status` dùng để cài lại, gỡ hoặc xem trạng thái.
+
 | Sự kiện Claude Code | Lệnh | Tác dụng |
 |---|---|---|
-| SessionStart | `brain start` | nạp context nhỏ nhất (thay "đọc") |
-| PreToolUse `Edit\|Write` | `brain trap-check <file_path>` | chèn trap đúng lúc |
-| PreToolUse `Bash` | `brain trap-check --cmd <command>` | bắt trap `kw:` (vd. pnpm) |
-| PreToolUse `Agent` | `brain brief-lint` | cảnh báo brief thiếu mục (không chặn) |
-| Stop | `brain end --check` | nhắc cập nhật memory, chặn tối đa 1 lần mỗi phiên |
-| SessionEnd | `brain ingest claude --session <id>` | đưa số đo vào runs.sqlite |
+| SessionStart (`startup\|resume\|clear\|compact`) | `brain start --hook` | In gate, CONTEXT, quyết định đang hiệu lực, trap gần nhất, story đang làm. Ghi trạng thái đầu phiên. |
+| UserPromptSubmit | `brain trap-check --hook --prompt` | Trap có `kw:` khớp prompt |
+| PreToolUse `Read\|Edit\|Write\|MultiEdit\|NotebookEdit\|Bash\|PowerShell` | `brain trap-check --hook` | `additionalContext`: trap khớp path glob, hoặc `kw:` trong lệnh / nội dung sửa. Mỗi trap tối đa một lần mỗi phiên. |
+| Stop | `brain end --check --hook` | Code đổi mà memory chưa đổi thì trả `{"decision":"block"}`, tối đa một lần. Cuối cùng ghi journal. |
 
-omp: pha 3 kiểm xem omp có cơ chế hook không. Nếu không có thì dùng wrapper `brain run-omp …` trong herdr, gọi `start` trước và `end` + `ingest omp` sau phiên.
+Kiểm thực tế ngày 2026-10-21 bằng `claude -p`:
+- Output SessionStart và `additionalContext` của PreToolUse đều tới được agent.
+- Trên T07, agent áp dụng trap và tự cập nhật CONTEXT / TRAPS / decisions đúng định dạng.
+
+**omp** (18.4.9, chạy trong WSL) có API extension. File `hooks/omp/brain-v3.ts` gọi cùng CLI qua `python3`:
+- `before_agent_start` → `{message}` chứa output của `brain start`;
+- `tool_call` → `{additionalContext}` từ `trap-check`;
+- `agent_end` → `sendMessage(..., {deliverAs: "nextTurn", triggerTurn: true})` khi `end --check` trả block.
+
+Nạp bằng `omp --hook /mnt/d/SecondBrainV3/Brain/hooks/omp/brain-v3.ts`. Đã kiểm bằng `omp -p` ngày 2026-10-21: context, trap và việc tự chạy lượt bổ sung đều hoạt động.
+
+Chưa làm:
+- PreToolUse `Agent` → `brain brief-lint` (cùng lúc port agent-ops, pha 5);
+- SessionEnd → `brain ingest` (pha 5).
 
 ## 7. Lớp thực thi (ADR-006)
 
