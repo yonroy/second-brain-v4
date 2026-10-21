@@ -214,19 +214,25 @@ Chưa đạt: ở chế độ headless, agent không in checklist trước khi b
 
 ## 8. Đo lường (ADR-008)
 
-- Adapter `claude` đọc `~/.claude/projects/<slug>/*.jsonl` (và `subagents/`). Adapter `omp` port từ `agent_ops.py` và đọc `~/.omp/agent/sessions/**/*.jsonl` trong WSL.
-- Cả hai đưa về một schema chung trong `_metrics/runs.sqlite`:
-  - `runs(id, brain_version, project, agent, role, story, started, minutes_active, tokens_in, tokens_out, cost_usd, tool_errors, parent_run)`
-  - `events(run_id, ts, kind, detail)`. `kind` ∈ `read_memory`, `trap_injected`, `trap_violated`, `verify`, `claim`, `claim_unbacked`, `end_ok`, `end_blocked`.
-- `brain stats` báo:
-  - phút / token / $ theo story;
-  - vòng làm lại;
-  - tỉ lệ trap được nạp trước khi chạm file;
-  - tỉ lệ vi phạm trap;
-  - claim không có lệnh chứng minh;
-  - tỉ lệ đóng phiên sạch;
-  - lỗi lọt (trap mới trỏ về story đã done).
-- Khoá chống trùng là `(source, session_id, message_id)`, để sửa lỗi harvest ghi đôi của v2.
+Mọi nguồn được đưa về một chỗ: `_metrics/runs.sqlite`, gồm bảng `runs` (khoá `(source, run_id)`, ingest lại thì ghi đè) và bảng `events` (ví dụ `claim_unbacked`).
+
+- **`brain ingest omp`** (`brain/metrics/omp_parse.py`) port **nguyên văn** bộ đọc phiên và bộ phát hiện claim của `agent_ops.py` v2. Chỉ đổi một điểm: vai trò reviewer/tester lấy từ `brain.toml [roles]`, không hardcode.
+  - Chạy trong WSL, đọc `~/.omp/agent/sessions`.
+  - Extension omp gọi tự động ở `session_shutdown`.
+- **`brain ingest claude`** (`brain/metrics/claude.py`) đọc `~/.claude/projects/<slug>/*.jsonl` và `<sid>/subagents/agent-*.jsonl` (`agentType` lấy từ `.meta.json`).
+  - Usage tính một lần cho mỗi message id.
+  - Phút = tổng các khoảng giữa hai sự kiện liên tiếp, mỗi khoảng tối đa 5 phút.
+  - Đếm thẳng `traps_injected` và `stop_blocks` từ attachment `hook_success`.
+  - $ chỉ có khi `[metrics.prices]` khai giá cho model; không đoán.
+  - Hook SessionEnd gọi tự động.
+- **Đo một project ngoài v3** (baseline v1/v2): `brain ingest omp --cwd <codebase> --name X --version 2 --patterns v2`.
+- **`brain stats [--by agent|version|ticket|project] [--unbacked]`** in các cột: phút (trung vị, p90 nearest-rank), lỗi tool %, token, $, đọc trap, trap được tiêm, Stop chặn, brief đủ, claim không bằng chứng.
+- **`brain brief-lint`** dùng cùng hợp đồng brief như v2. Hook PreToolUse `Agent|Task` chỉ cảnh báo qua `additionalContext`, không chặn.
+
+**Nghiệm thu ngày 2026-10-21** (log omp thật của AFE, so với `agent_ops.py scan + build_rows` chạy cùng lúc):
+- Trên 58 run, khớp **100%** ở mọi chỉ số tổng: phút 7942,9 · token 792.935.332 · $417,00 · tool 5521 / lỗi 192 · lượt 4244 · đọc MISTAKES/CONTEXT/DECISIONS 34/26/30 · yield 49 · claim không bằng chứng 1.
+- Có 0 run lệch agent, verdict hoặc brief.
+- **Lỗi v2 phát hiện được:** omp chép file subagent vào các phiên cha sau (khi resume/fork). `agent_ops` đếm mỗi bản chép là một dòng, nên ra 76 dòng cho 58 run (**+31%**); `runs.tsv` trên đĩa có 54 dòng nhưng chỉ 37 run. v3 bỏ bản chép theo `sub_id`.
 
 ## 9. Benchmark (ADR-007)
 

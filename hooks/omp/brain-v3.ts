@@ -1,7 +1,7 @@
 // Second Brain v3 hooks for omp (ADR-004). Same CLI as the Claude Code hooks, called with python3.
 // Load per run:   omp --hook /mnt/d/SecondBrainV3/Brain/hooks/omp/brain-v3.ts
 // Events used (omp extension API): before_agent_start → message, tool_call → additionalContext,
-// agent_end → sendMessage(nextTurn) once when code changed but memory did not.
+// agent_end → sendMessage(nextTurn) once when code changed but memory did not; session_shutdown → ingest omp.
 import { execFileSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -48,6 +48,10 @@ export default function (pi: any) {
       brain(["trap-check", "--hook"], { tool_name: event.toolName, tool_input: event.input ?? {} }, ctx.cwd),
     );
     if (extra) return { additionalContext: extra };
+  });
+
+  pi.on("session_shutdown", async (_event: any, ctx: any) => {
+    brain(["ingest", "omp", "--hook"], {}, ctx.cwd); // subagent numbers into _metrics/runs.sqlite
   });
 
   pi.on("agent_end", async (_event: any, ctx: any) => {
