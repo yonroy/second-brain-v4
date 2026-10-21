@@ -1,0 +1,365 @@
+[project]
+name = "crm-reports"
+summary = "Báo cáo khách hàng"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-12"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "CI chạy trên GitHub Actions, nhánh mặc định `main`"
+date = "2026-10-03"
+source = "file:.github/workflows/ci.yml"
+
+[[traps]]
+id = "M-090"
+title = "Docker volume trên WSL bị lỗi quyền ghi"
+trigger = ["docker-compose.yml", "kw:docker"]
+symptom = "Permission denied khi container ghi vào ./data"
+fix = "Chạy docker từ WSL với user 1000:1000."
+seen = ["2026-09-18"]
+
+[[decisions]]
+id = "ADR-100"
+date = "2026-03-01"
+title = "Quy ước về tìm kiếm sản phẩm chậm khi có dấu"
+decision = "Áp dụng cho src/search.py: tìm kiếm sản phẩm chậm khi có dấu, thêm normalize trước khi so."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-101"
+date = "2026-03-04"
+title = "Quy ước về token hết hạn sau 15 phút"
+decision = "Áp dụng cho src/auth.py: token hết hạn sau 15 phút, refresh token 7 ngày."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-102"
+date = "2026-03-07"
+title = "Quy ước về giới hạn ảnh 5MB"
+decision = "Áp dụng cho src/upload.py: giới hạn ảnh 5MB, nén JPEG chất lượng 85."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-103"
+date = "2026-03-10"
+title = "Quy ước về log JSON một dòng"
+decision = "Áp dụng cho src/logging_setup.py: log JSON một dòng, bỏ print."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-104"
+date = "2026-03-13"
+title = "Quy ước về trang admin phân trang 50 dòng"
+decision = "Áp dụng cho src/admin.py: trang admin phân trang 50 dòng."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-105"
+date = "2026-04-16"
+title = "Quy ước về chuỗi tiếng Việt để trong locale/vi.json"
+decision = "Áp dụng cho src/i18n.py: chuỗi tiếng Việt để trong locale/vi.json."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-106"
+date = "2026-04-19"
+title = "Quy ước về banner trang chủ đổi theo mùa"
+decision = "Áp dụng cho src/banner.py: banner trang chủ đổi theo mùa, cấu hình trong data/banners.json."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-107"
+date = "2026-04-22"
+title = "Quy ước về tồn kho âm thì chặn đặt hàng"
+decision = "Áp dụng cho src/inventory.py: tồn kho âm thì chặn đặt hàng."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-108"
+date = "2026-04-25"
+title = "Quy ước về ô nhập mã giảm giá viết hoa tự động"
+decision = "Áp dụng cho src/coupon_ui.py: ô nhập mã giảm giá viết hoa tự động."
+why = "Thống nhất trong team."
+
+[[decisions]]
+id = "ADR-109"
+date = "2026-04-01"
+title = "Quy ước về sitemap sinh lúc 2h sáng"
+decision = "Áp dụng cho src/sitemap.py: sitemap sinh lúc 2h sáng."
+why = "Thống nhất trong team."
+
+[[history]]
+kind = "journal"
+date = "2026-03-01"
+text = "- Mục tiêu: tìm kiếm sản phẩm chậm khi có dấu, thêm normalize trước khi so\n- Code đã sửa: src/search.py\n- Kết quả: test xanh"
+files = ["src/search.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-03-06"
+text = "- Mục tiêu: token hết hạn sau 15 phút, refresh token 7 ngày\n- Code đã sửa: src/auth.py\n- Kết quả: test xanh"
+files = ["src/auth.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-03-11"
+text = "- Mục tiêu: giới hạn ảnh 5MB, nén JPEG chất lượng 85\n- Code đã sửa: src/upload.py\n- Kết quả: test xanh"
+files = ["src/upload.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-03-16"
+text = "- Mục tiêu: log JSON một dòng, bỏ print\n- Code đã sửa: src/logging_setup.py\n- Kết quả: test xanh"
+files = ["src/logging_setup.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-03-21"
+text = "- Mục tiêu: trang admin phân trang 50 dòng\n- Code đã sửa: src/admin.py\n- Kết quả: test xanh"
+files = ["src/admin.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-03-26"
+text = "- Mục tiêu: chuỗi tiếng Việt để trong locale/vi.json\n- Code đã sửa: src/i18n.py\n- Kết quả: test xanh"
+files = ["src/i18n.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-04"
+text = "- Mục tiêu: banner trang chủ đổi theo mùa, cấu hình trong data/banners.json\n- Code đã sửa: src/banner.py\n- Kết quả: test xanh"
+files = ["src/banner.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-09"
+text = "- Mục tiêu: tồn kho âm thì chặn đặt hàng\n- Code đã sửa: src/inventory.py\n- Kết quả: test xanh"
+files = ["src/inventory.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-14"
+text = "- Mục tiêu: ô nhập mã giảm giá viết hoa tự động\n- Code đã sửa: src/coupon_ui.py\n- Kết quả: test xanh"
+files = ["src/coupon_ui.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-19"
+text = "- Mục tiêu: sitemap sinh lúc 2h sáng\n- Code đã sửa: src/sitemap.py\n- Kết quả: test xanh"
+files = ["src/sitemap.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-24"
+text = "- Mục tiêu: đánh giá sản phẩm cần duyệt trước khi hiện\n- Code đã sửa: src/reviews.py\n- Kết quả: test xanh"
+files = ["src/reviews.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-04-02"
+text = "- Mục tiêu: giới hạn 60 request/phút mỗi IP\n- Code đã sửa: src/rate_limit.py\n- Kết quả: test xanh"
+files = ["src/rate_limit.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-07"
+text = "- Mục tiêu: backup DB hằng đêm lên S3, giữ 14 bản\n- Code đã sửa: src/backup.py\n- Kết quả: test xanh"
+files = ["src/backup.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-12"
+text = "- Mục tiêu: cờ tính năng đọc từ config/flags.toml\n- Code đã sửa: src/feature_flags.py\n- Kết quả: test xanh"
+files = ["src/feature_flags.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-17"
+text = "- Mục tiêu: endpoint /health trả version và commit\n- Code đã sửa: src/health.py\n- Kết quả: test xanh"
+files = ["src/health.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-22"
+text = "- Mục tiêu: tìm kiếm sản phẩm chậm khi có dấu, thêm normalize trước khi so\n- Code đã sửa: src/search.py\n- Kết quả: test xanh"
+files = ["src/search.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-27"
+text = "- Mục tiêu: token hết hạn sau 15 phút, refresh token 7 ngày\n- Code đã sửa: src/auth.py\n- Kết quả: test xanh"
+files = ["src/auth.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-05-05"
+text = "- Mục tiêu: giới hạn ảnh 5MB, nén JPEG chất lượng 85\n- Code đã sửa: src/upload.py\n- Kết quả: test xanh"
+files = ["src/upload.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-10"
+text = "- Mục tiêu: log JSON một dòng, bỏ print\n- Code đã sửa: src/logging_setup.py\n- Kết quả: test xanh"
+files = ["src/logging_setup.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-15"
+text = "- Mục tiêu: trang admin phân trang 50 dòng\n- Code đã sửa: src/admin.py\n- Kết quả: test xanh"
+files = ["src/admin.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-20"
+text = "- Mục tiêu: chuỗi tiếng Việt để trong locale/vi.json\n- Code đã sửa: src/i18n.py\n- Kết quả: test xanh"
+files = ["src/i18n.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-25"
+text = "- Mục tiêu: banner trang chủ đổi theo mùa, cấu hình trong data/banners.json\n- Code đã sửa: src/banner.py\n- Kết quả: test xanh"
+files = ["src/banner.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-03"
+text = "- Mục tiêu: tồn kho âm thì chặn đặt hàng\n- Code đã sửa: src/inventory.py\n- Kết quả: test xanh"
+files = ["src/inventory.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-06-08"
+text = "- Mục tiêu: ô nhập mã giảm giá viết hoa tự động\n- Code đã sửa: src/coupon_ui.py\n- Kết quả: test xanh"
+files = ["src/coupon_ui.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-13"
+text = "- Mục tiêu: sitemap sinh lúc 2h sáng\n- Code đã sửa: src/sitemap.py\n- Kết quả: test xanh"
+files = ["src/sitemap.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-18"
+text = "- Mục tiêu: đánh giá sản phẩm cần duyệt trước khi hiện\n- Code đã sửa: src/reviews.py\n- Kết quả: test xanh"
+files = ["src/reviews.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-23"
+text = "- Mục tiêu: giới hạn 60 request/phút mỗi IP\n- Code đã sửa: src/rate_limit.py\n- Kết quả: test xanh"
+files = ["src/rate_limit.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-01"
+text = "- Mục tiêu: backup DB hằng đêm lên S3, giữ 14 bản\n- Code đã sửa: src/backup.py\n- Kết quả: test xanh"
+files = ["src/backup.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-06"
+text = "- Mục tiêu: cờ tính năng đọc từ config/flags.toml\n- Code đã sửa: src/feature_flags.py\n- Kết quả: test xanh"
+files = ["src/feature_flags.py"]
+
+[[history]]
+kind = "journal"
+date = "2026-07-11"
+text = "- Mục tiêu: endpoint /health trả version và commit\n- Code đã sửa: src/health.py\n- Kết quả: test xanh"
+files = ["src/health.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-03-02"
+text = "chore: tìm kiếm sản phẩm chậm khi có dấu"
+files = ["src/search.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-03-09"
+text = "chore: giới hạn ảnh 5MB"
+files = ["src/upload.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-03-16"
+text = "chore: trang admin phân trang 50 dòng"
+files = ["src/admin.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-04-23"
+text = "chore: banner trang chủ đổi theo mùa"
+files = ["src/banner.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-04-04"
+text = "chore: ô nhập mã giảm giá viết hoa tự động"
+files = ["src/coupon_ui.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-04-11"
+text = "chore: đánh giá sản phẩm cần duyệt trước khi hiện"
+files = ["src/reviews.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-05-18"
+text = "chore: backup DB hằng đêm lên S3"
+files = ["src/backup.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-05-25"
+text = "chore: endpoint /health trả version và commit"
+files = ["src/health.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-05-06"
+text = "chore: token hết hạn sau 15 phút"
+files = ["src/auth.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-06-13"
+text = "chore: log JSON một dòng"
+files = ["src/logging_setup.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-06-20"
+text = "chore: chuỗi tiếng Việt để trong locale/vi.json"
+files = ["src/i18n.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-06-27"
+text = "chore: tồn kho âm thì chặn đặt hàng"
+files = ["src/inventory.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-07-08"
+text = "chore: sitemap sinh lúc 2h sáng"
+files = ["src/sitemap.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-07-15"
+text = "chore: giới hạn 60 request/phút mỗi IP"
+files = ["src/rate_limit.py"]
+
+[[history]]
+kind = "commit"
+date = "2026-07-22"
+text = "chore: cờ tính năng đọc từ config/flags.toml"
+files = ["src/feature_flags.py"]

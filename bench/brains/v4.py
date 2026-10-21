@@ -7,6 +7,7 @@ import unicodedata
 from pathlib import Path
 
 from bench.brains.base import Brain, Env, fwd, write
+from bench.brains.history import make_commits, render_history
 from bench.seed import Seed
 
 SECTIONS = {"env": "Môi trường", "arch": "Kiến trúc", "status": "Đang làm", "next": "Việc tiếp theo"}
@@ -55,12 +56,29 @@ def _proof(seed: Seed) -> str:
                       "## Khoảng trống đã biết", ""])
 
 
+def _index(work: Path, hub: Path) -> None:
+    """`brain index` once it exists (phase 3); before that the v4 adapter equals v3 with v4 packaging."""
+    from brain import cli
+    if not hasattr(cli, "cmd_index"):
+        return
+    import os
+    from unittest import mock
+    with mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(hub)}):
+        old = os.getcwd()
+        os.chdir(work)
+        try:
+            cli.main(["index"])
+        finally:
+            os.chdir(old)
+
+
 class V4(Brain):
     name = "v4"
 
     def setup(self, work: Path, hub: Path, seed: Seed) -> Env:
         from brain import hooks, skills
         from brain.init import init
+        make_commits(work, seed)  # history commits first: init below adds CLAUDE.md on top
         subprocess.run(["git", "init", "-q"], cwd=work, check=True)  # so hooks/skills land in .git/info/exclude
         init(seed.name, work, hub)
         hooks.install(work.resolve())
@@ -74,6 +92,8 @@ class V4(Brain):
                   f"# {d.id} — {d.title}\n\n**Ngày:** {d.date} · **Trạng thái:** active\n\n"
                   f"## Context\n{d.why}\n\n## Decision\n{d.decision}\n")
         write(proj / "PROOF.md", _proof(seed))
+        render_history(hub, seed)
+        _index(work, hub)
         return Env(extra_env={"SECOND_BRAIN_V4_ROOT": fwd(hub)}, add_dirs=[hub])
 
     def memory_paths(self, work: Path, hub: Path, seed: Seed) -> list[Path]:

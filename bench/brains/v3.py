@@ -12,6 +12,7 @@ from pathlib import Path
 
 from bench.brains.base import Brain, Env, fwd, write
 from bench.brains.v4 import _context, _decisions, _proof, _slug, _traps
+from bench.brains.history import make_commits, render_history
 from bench.seed import Seed
 
 V3_PACKAGE = Path(os.environ.get("BENCH_V3_PACKAGE", "D:/SecondBrainV3/Brain"))
@@ -21,6 +22,7 @@ class V3(Brain):
     name = "v3"
 
     def setup(self, work: Path, hub: Path, seed: Seed) -> Env:
+        make_commits(work, seed)  # history commits first: init below adds CLAUDE.md on top
         subprocess.run(["git", "init", "-q"], cwd=work, check=True)
         env = {k: v for k, v in os.environ.items() if k != "SECOND_BRAIN_V4_ROOT"}
         env["SECOND_BRAIN_V3_ROOT"] = str(hub)
@@ -38,6 +40,7 @@ class V3(Brain):
                   f"# {d.id} — {d.title}\n\n**Ngày:** {d.date} · **Trạng thái:** {d.status}\n\n"
                   f"## Context\n{d.why}\n\n## Decision\n{d.decision}\n")
         write(proj / "PROOF.md", _proof(seed))
+        render_history(hub, seed)
         return Env(extra_env={"SECOND_BRAIN_V3_ROOT": fwd(hub)}, add_dirs=[hub])
 
     def memory_paths(self, work: Path, hub: Path, seed: Seed) -> list[Path]:

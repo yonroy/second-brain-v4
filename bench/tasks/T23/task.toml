@@ -1,0 +1,5 @@
+id = "T23"
+title = "Fact đã bị dọn khỏi CONTEXT, chỉ còn trong archive"
+kind = "history"
+prompt = "Từ hôm qua `fetch_order` lỗi HTTP 410 Gone. Sửa giúp."
+memory_keywords = ["fetch_order", "X-Version", "v2"]

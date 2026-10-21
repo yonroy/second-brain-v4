@@ -1,0 +1,5 @@
+id = "T21"
+title = "Đổi tên cột có tham chiếu trong SQL và JSON"
+kind = "graph"
+prompt = "Đổi tên cột `cust_name` thành `customer_name` cho rõ nghĩa."
+memory_keywords = ["customer_name"]

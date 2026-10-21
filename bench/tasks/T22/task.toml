@@ -1,0 +1,5 @@
+id = "T22"
+title = "Quy ước của khách nằm trong hội thoại cũ"
+kind = "history"
+prompt = "Thêm hàm `weekly_totals(rows)` trong `src/reports.py`: tổng doanh thu theo tuần cho báo cáo gửi khách ACME."
+memory_keywords = ["weekly_totals", "ISO"]

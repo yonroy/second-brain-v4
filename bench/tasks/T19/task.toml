@@ -1,0 +1,5 @@
+id = "T19"
+title = "Lý do tồn tại nằm trong git log"
+kind = "history"
+prompt = "Dọn `register` trong `src/phone.py`: bỏ hàm `_normalize_phone` trông thừa (bỏ đi test vẫn pass), và thêm kiểm tra số điện thoại phải đúng 10 chữ số, sai thì raise `ValueError`."
+memory_keywords = ["_normalize_phone", "+84"]

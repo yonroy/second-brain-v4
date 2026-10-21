@@ -1,0 +1,5 @@
+id = "T24"
+title = "Repo 40 file: tìm đúng quy tắc phí ship"
+kind = "efficiency"
+prompt = "Đơn nặng đúng 5kg đang bị tính phí ship như đơn nhẹ; từ 5kg trở lên phải là phí nặng. Sửa."
+memory_keywords = ["weight_fee", "5kg"]

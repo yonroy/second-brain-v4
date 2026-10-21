@@ -1,0 +1,5 @@
+id = "T18"
+title = "Một ADR liên quan giữa 25 quyết định nhiễu"
+kind = "efficiency"
+prompt = "Thêm hàm `send_password_reset(user, link)` trong `src/notify.py` gửi email chứa link đặt lại mật khẩu cho user."
+memory_keywords = ["send_password_reset"]

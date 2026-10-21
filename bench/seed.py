@@ -51,6 +51,20 @@ class Proof:
 
 
 @dataclass
+class History:
+    """Past knowledge that is not part of the current snapshot (spec v4 §10).
+
+    kind: journal | transcript (rendered as a journal page) | archived_fact (an old CONTEXT in _archive)
+          | commit (a real, back-dated git commit touching `files`).
+    """
+    kind: str
+    date: str
+    text: str
+    files: list[str] = field(default_factory=list)
+    ref: str = ""
+
+
+@dataclass
 class Seed:
     name: str
     summary: str
@@ -60,6 +74,7 @@ class Seed:
     traps: list[Trap] = field(default_factory=list)
     decisions: list[Decision] = field(default_factory=list)
     proofs: list[Proof] = field(default_factory=list)
+    history: list[History] = field(default_factory=list)
 
     def facts_in(self, *sections: str) -> list[Fact]:
         return [f for f in self.facts if f.section in sections]
@@ -77,4 +92,5 @@ def load_seed(path: Path) -> Seed:
         traps=[Trap(**t) for t in data.get("traps", [])],
         decisions=[Decision(**d) for d in data.get("decisions", [])],
         proofs=[Proof(**p) for p in data.get("proofs", [])],
+        history=[History(**h) for h in data.get("history", [])],
     )

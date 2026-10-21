@@ -1,0 +1,5 @@
+id = "T20"
+title = "Đổi chữ ký hàm có caller qua alias và partial"
+kind = "graph"
+prompt = "`tax_rate(category)` cần thêm tham số bắt buộc `region` (thuế khác theo vùng: VN ×1.0, US ×1.6). Mọi luồng hiện có dùng `\"VN\"`. Cập nhật `tax_rate` và mọi chỗ gọi."
+memory_keywords = ["tax_rate", "region"]
