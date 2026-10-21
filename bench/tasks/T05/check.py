@@ -12,5 +12,5 @@ print('ok')
 
 
 def check(work, events):
-    r = subprocess.run([sys.executable, "-c", CODE], cwd=work, capture_output=True, text=True, timeout=60)
+    r = subprocess.run([sys.executable, "-c", CODE], cwd=work, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     return {"pass": r.stdout.strip().endswith("ok"), "trap_avoided": None, "notes": (r.stdout + r.stderr)[-300:]}

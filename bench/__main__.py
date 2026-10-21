@@ -50,6 +50,32 @@ def cmd_run(a) -> int:
     return 0
 
 
+def cmd_rescore(a) -> int:
+    """Re-run hidden checkers on preserved work dirs after a checker fix; rewrites the JSONL in place."""
+    import json
+    from bench.score import load_events
+    from bench.tasks import load_task, TASKS_DIR
+    path = Path(a.file)
+    rows = report.load_rows([path])
+    want = {t.strip().upper() for t in a.task.split(",")} if a.task != "all" else None
+    changed = 0
+    for r in rows:
+        if want and r["task"] not in want:
+            continue
+        run_dir = Path(r["run_dir"])
+        if not (run_dir / "work").exists():
+            continue
+        res = load_task(TASKS_DIR / r["task"]).check(run_dir / "work", load_events(run_dir / "events.jsonl"))
+        if res.get("pass") != r.get("pass") or res.get("trap_avoided") != r.get("trap_avoided"):
+            changed += 1
+            print(f"{r['task']} {r['brain']} r{r['repeat']}: pass {r.get('pass')} → {res.get('pass')}")
+        r.update(res)
+        r["rescored"] = True
+    path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    print(f"Đã chấm lại, {changed} lượt đổi kết quả.")
+    return 0
+
+
 def cmd_report(a) -> int:
     text = report.render(report.load_rows([Path(p) for p in a.files]))
     if a.out:
@@ -78,6 +104,10 @@ def main(argv=None) -> int:
     r.add_argument("--jobs", type=int, default=2)
     r.add_argument("--timeout", type=int, default=900)
     r.set_defaults(fn=cmd_run)
+    rs = sub.add_parser("rescore")
+    rs.add_argument("file")
+    rs.add_argument("--task", default="all")
+    rs.set_defaults(fn=cmd_rescore)
     rp = sub.add_parser("report")
     rp.add_argument("files", nargs="+")
     rp.add_argument("--out")

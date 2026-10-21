@@ -10,7 +10,7 @@ def check(work, events):
     code = ("import json,sys; sys.stdout.reconfigure(encoding='utf-8'); from src.text import slugify; "
             "print(json.dumps([slugify(a) for a in json.loads(sys.argv[1])]))")
     r = subprocess.run([sys.executable, "-c", code, json.dumps([a for a, _ in CASES])], cwd=work,
-                       capture_output=True, text=True, timeout=60, encoding="utf-8")
+                       capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=60)
     try:
         got = json.loads(r.stdout.strip().splitlines()[-1])
     except Exception:
