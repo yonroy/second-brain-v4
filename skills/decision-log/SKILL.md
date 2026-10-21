@@ -1,9 +1,9 @@
 ---
-name: nhat-ky
-description: Giữ decision log TSV cho việc dài hoặc chạy không giám sát - mỗi quyết định một dòng (thời điểm, pha, quyết định, lý do, bằng chứng, kết quả), để user audit sau. Dùng khi user gõ /nhat-ky, khi chạy playbook chay-qua-dem của skill lam, hoặc việc nhiều pha user sẽ xem lại sau.
+name: decision-log
+description: Giữ decision log TSV cho việc dài hoặc chạy không giám sát - mỗi quyết định một dòng (thời điểm, pha, quyết định, lý do, bằng chứng, kết quả), để user audit sau. Dùng khi user gõ /decision-log, khi chạy playbook overnight của skill work, hoặc việc nhiều pha user sẽ xem lại sau.
 ---
 
-# nhat-ky — dấu vết quyết định có thể audit
+# decision-log — dấu vết quyết định có thể audit
 
 Viết lại từ skill `show-me-your-work` của pstack (MIT). Mỗi lần chạy một file log.
 

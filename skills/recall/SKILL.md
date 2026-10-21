@@ -1,9 +1,9 @@
 ---
-name: nho
-description: Tra lịch sử dài và code graph của dự án Second Brain v4 trước khi đoán - dùng `brain recall` khi gặp triệu chứng, quy ước khách hàng, quyết định hoặc "vì sao code thế này", và `brain graph uses` trước khi đổi tên, đổi chữ ký hay xoá một hàm/cột/handler. Dùng khi skill lam hoặc playbook gọi tới, hoặc khi user hỏi về chuyện đã làm trước đây.
+name: recall
+description: Tra lịch sử dài và code graph của dự án Second Brain v4 trước khi đoán - dùng `brain recall` khi gặp triệu chứng, quy ước khách hàng, quyết định hoặc "vì sao code thế này", và `brain graph uses` trước khi đổi tên, đổi chữ ký hay xoá một hàm/cột/handler. Dùng khi skill work hoặc playbook gọi tới, hoặc khi user hỏi về chuyện đã làm trước đây.
 ---
 
-# nho — nhớ trước khi đoán
+# recall — nhớ trước khi đoán
 
 Lớp Recall của v4 index **journal cũ, mọi quyết định (kể cả đã thay), fact đã dời khỏi CONTEXT (archive), trap và git log**, cùng một code graph của repo. Hook đã tự tiêm một phần, có ngân sách. Skill này dùng khi bạn cần tra **chủ động**.
 

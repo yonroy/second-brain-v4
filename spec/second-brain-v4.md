@@ -79,11 +79,11 @@ D:\SecondBrainV4\            env SECOND_BRAIN_V4_ROOT · marker CLAUDE.md SECOND
 | `context <path>` | Xem trước nội dung hook sẽ tiêm khi Read file này |
 
 ## 8. Skill
-- **Skill mới `nho`:** dùng `brain recall` khi gặp triệu chứng hoặc quyết định cũ, `brain graph uses` trước khi đổi hoặc xoá API, thay vì chỉ grep.
-- **Sửa playbook trong `lam`:**
-  - `refactor`, `tinh-nang`: trước khi đổi API, chạy `brain graph uses`;
-  - `sua-bug`: chạy `brain recall` theo triệu chứng;
-  - `dieu-tra`: dùng `recall` cho các câu hỏi "vì sao".
+- **Skill mới `recall`:** dùng `brain recall` khi gặp triệu chứng hoặc quyết định cũ, `brain graph uses` trước khi đổi hoặc xoá API, thay vì chỉ grep.
+- **Sửa playbook trong `work`:**
+  - `refactor`, `feature`: trước khi đổi API, chạy `brain graph uses`;
+  - `bug-fix`: chạy `brain recall` theo triệu chứng;
+  - `investigate`: dùng `recall` cho các câu hỏi "vì sao".
 
 ## 9. Đo (bổ sung cho v3 §8)
 - `runs` thêm `recall_injected`, `context_injected`, `budget_used`. `events` thêm `injected:<key>`.

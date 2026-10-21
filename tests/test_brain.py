@@ -316,13 +316,13 @@ class HookInstallTests(Base):
     def test_skills_install_links_and_is_idempotent(self):
         from brain import skills
         first = dict(skills.install(self.code))
-        self.assertEqual(set(first), {"lam", "hieu", "tdd", "soi", "sua-goc", "nhat-ky", "nho"})
-        self.assertTrue((self.code / ".claude" / "skills" / "lam" / "playbooks" / "sua-bug.md").exists())
-        self.assertTrue((self.code / ".claude" / "skills" / "lam" / "nguyen-tac" / "idempotent.md").exists())
+        self.assertEqual(set(first), {"work", "explain", "tdd", "cross-review", "root-fix", "decision-log", "recall"})
+        self.assertTrue((self.code / ".claude" / "skills" / "work" / "playbooks" / "bug-fix.md").exists())
+        self.assertTrue((self.code / ".claude" / "skills" / "work" / "principles" / "idempotent.md").exists())
         again = dict(skills.install(self.code))
         self.assertTrue(all(v in ("đã có",) for v in again.values()), again)
-        self.assertIn(".claude/skills/lam", (self.code / ".git" / "info" / "exclude").read_text(encoding="utf-8"))
-        self.assertIn("/skills/lam/SKILL.md", (self.code / "CLAUDE.md").read_text(encoding="utf-8"))
+        self.assertIn(".claude/skills/work", (self.code / ".git" / "info" / "exclude").read_text(encoding="utf-8"))
+        self.assertIn("/skills/work/SKILL.md", (self.code / "CLAUDE.md").read_text(encoding="utf-8"))
 
     def test_cli_init_installs_hooks(self):
         other = self.tmp / "code" / "svc"
@@ -364,8 +364,8 @@ class CoexistWithV3Tests(Base):
     def test_init_keeps_v3_hooks_relinks_skills_and_gate_flags(self):
         rc, out = self.run_cli("init")
         self.assertEqual(self.gens(), ["v3", "v4"], "v4 install must not drop v3 entries")
-        lam = (self.code / ".claude" / "skills" / "lam").resolve()
-        self.assertEqual(lam, (paths.PACKAGE / "skills" / "lam").resolve(), "skill links now point at v4")
+        lam = (self.code / ".claude" / "skills" / "work").resolve()
+        self.assertEqual(lam, (paths.PACKAGE / "skills" / "work").resolve(), "skill links now point at v4")
         self.assertTrue(any("SECOND-BRAIN-V3" in f.what for f in gate.check(find_project("svc"))))
 
     def test_migrate_removes_v3_and_keeps_v4(self):

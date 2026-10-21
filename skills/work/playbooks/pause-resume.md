@@ -11,7 +11,7 @@
    - CONTEXT `Đang làm`: đang ở bước nào, cái gì đã kiểm, có `[ngày|nguồn]`.
    - CONTEXT `Việc tiếp theo`: hành động đầu tiên khi quay lại.
    - Bẫy vừa gặp thì ghi vào TRAPS.
-   - Có `nhat-ky` thì trỏ tới, không chép lại.
+   - Có `decision-log` thì trỏ tới, không chép lại.
 
 **Trả lời:** đang ở đâu, cái gì đã lên đĩa và cái gì chỉ còn trong đầu, commit đã tạo, cây code sạch hay chưa, hành động đầu tiên khi tiếp tục.
 
@@ -19,7 +19,7 @@
 
 **Bạn chịu trách nhiệm về điểm tiếp tục.** Đọc dấu vết phiên trước, đừng làm lại.
 
-1. Đọc `brain start` (CONTEXT `Đang làm` / `Việc tiếp theo`), journal mới nhất, `nhat-ky` nếu có, `git log` và `git status`.
+1. Đọc `brain start` (CONTEXT `Đang làm` / `Việc tiếp theo`), journal mới nhất, `decision-log` nếu có, `git log` và `git status`.
 2. Dựng lại trạng thái: nhánh, cái đã xong, quyết định đã chốt. Dấu vết ghi lại là nguồn đáng tin; đừng "kiểm lại từ đầu".
 3. So cái đã xong với cái còn lại, gọi tên điểm tiếp tục.
 4. Chuyển phần còn lại sang playbook phù hợp.

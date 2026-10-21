@@ -10,5 +10,5 @@
 - Không embedding, không LLM. `.index/` là dữ liệu dẫn xuất, dựng lại được.
 
 ## Consequences
-- Truy hồi theo từ khoá nên có thể trượt khi diễn đạt khác. Bù bằng cách khớp theo file (`files`) và bằng skill `nho`.
+- Truy hồi theo từ khoá nên có thể trượt khi diễn đạt khác. Bù bằng cách khớp theo file (`files`) và bằng skill `recall`.
 - Có thể thêm adapter cognee sau để so, nhưng chỉ khi bench cho thấy recall theo từ khoá là chỗ nghẽn.

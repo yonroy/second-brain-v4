@@ -1,9 +1,9 @@
 ---
-name: sua-goc
-description: Tìm các lỗi agent cứ lặp lại trong dự án và làm cho chúng không thể xảy ra - sửa ở mức cao nhất có thể (kiến trúc, kiểu, lint, test; tài liệu là cuối cùng), chứng minh check fail trên lỗi cũ, ghi bảng luật ↔ enforcer. Dùng khi user gõ /sua-goc, trong review hằng tuần, hoặc khi một trap có seen từ 2 ngày trở lên.
+name: root-fix
+description: Tìm các lỗi agent cứ lặp lại trong dự án và làm cho chúng không thể xảy ra - sửa ở mức cao nhất có thể (kiến trúc, kiểu, lint, test; tài liệu là cuối cùng), chứng minh check fail trên lỗi cũ, ghi bảng luật ↔ enforcer. Dùng khi user gõ /root-fix, trong review hằng tuần, hoặc khi một trap có seen từ 2 ngày trở lên.
 ---
 
-# sua-goc — biến lỗi lặp thành thứ không thể xảy ra
+# root-fix — biến lỗi lặp thành thứ không thể xảy ra
 
 Viết lại từ skill `correct` của pstack (MIT). Đây là bậc 3 trong thang thăng cấp bài học (trap → luật → enforcer).
 

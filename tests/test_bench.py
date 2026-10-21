@@ -77,7 +77,7 @@ class V4AdapterTests(unittest.TestCase):
                 self.assertEqual([t.id for t in p.traps()], ["M-001"])
                 self.assertEqual(p.proofs()[0].id, "B-001")
             self.assertTrue((work / ".claude" / "settings.local.json").exists())
-            self.assertTrue((work / ".claude" / "skills" / "lam" / "SKILL.md").exists())
+            self.assertTrue((work / ".claude" / "skills" / "work" / "SKILL.md").exists())
             self.assertEqual(env.extra_env["SECOND_BRAIN_V4_ROOT"], str(hub).replace("\\", "/"))
             self.assertIn("SECOND-BRAIN-V4:START", (work / "CLAUDE.md").read_text(encoding="utf-8"))
         finally:

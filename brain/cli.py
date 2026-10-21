@@ -161,7 +161,7 @@ def cmd_promote(a) -> int:
     p = _project(a)
     r = clean.promote(p, a.min_days)
     print(f"# promote — {p.name}\n")
-    print(f"## Trap gặp ≥ {a.min_days} ngày, chưa có enforcer → lên bậc 3 (skill `sua-goc`)")
+    print(f"## Trap gặp ≥ {a.min_days} ngày, chưa có enforcer → lên bậc 3 (skill `root-fix`)")
     print("\n".join(f"- {t.id} {t.title} · seen {', '.join(t.seen)}" for t in r["ready"]) or "- (không có)")
     print("\n## Trap trùng ở project khác → cân nhắc chuyển lên `_global/traps.md`")
     print("\n".join(f"- {t.id} {t.title} · cũng có ở {', '.join(o)}" for t, o in r["shared"]) or "- (không có)")
@@ -324,7 +324,7 @@ def main(argv=None) -> int:
     s.add_argument("--no-skills", action="store_true", help="không link skill lớp thực thi vào .claude/skills")
     s.set_defaults(fn=cmd_init)
 
-    s = sub.add_parser("skills", help="link skill lớp thực thi (lam, hieu, tdd, soi, sua-goc, nhat-ky)")
+    s = sub.add_parser("skills", help="link skill lớp thực thi (work, explain, recall, tdd, cross-review, root-fix, decision-log)")
     s.add_argument("action", choices=["install"], nargs="?", default="install")
     s.add_argument("--global", dest="global_", action="store_true", help="vào ~/.claude/skills thay vì codebase")
     s.set_defaults(fn=cmd_skills)

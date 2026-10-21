@@ -1,13 +1,13 @@
 ---
-name: soi
-description: Review đối kháng một diff bằng nhiều model (opus, sonnet) chạy song song, rồi tổng hợp thành phán quyết Làm / Cân nhắc / Ghi nhận / Bỏ. Chỉ chạy khi user gõ /soi hoặc playbook của skill lam gọi tới cho thiết kế đang tranh cãi. Không tự sửa code.
+name: cross-review
+description: Review đối kháng một diff bằng nhiều model (opus, sonnet) chạy song song, rồi tổng hợp thành phán quyết Làm / Cân nhắc / Ghi nhận / Bỏ. Chỉ chạy khi user gõ /cross-review hoặc playbook của skill work gọi tới cho thiết kế đang tranh cãi. Không tự sửa code.
 ---
 
-# soi — review đa model
+# cross-review — review đa model
 
 Viết lại từ skill `interrogate` của pstack (MIT). Tín hiệu đến từ việc dùng **nhiều model khác nhau**, không phải từ việc gán persona. Kết quả là một phán quyết đã tổng hợp. **Không tự áp thay đổi.**
 
-User gõ `/soi` thì coi như đã duyệt việc spawn reviewer của skill này. Khi skill được playbook gọi tới thì phải báo trước và đợi user duyệt (Cổng 2).
+User gõ `/cross-review` thì coi như đã duyệt việc spawn reviewer của skill này. Khi skill được playbook gọi tới thì phải báo trước và đợi user duyệt (Cổng 2).
 
 ## 1. Phạm vi
 Lấy diff cần soi. Ưu tiên theo thứ tự:

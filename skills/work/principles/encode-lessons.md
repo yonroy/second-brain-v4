@@ -8,4 +8,4 @@ Bài học cần phán đoán, không mã hoá được thì làm lời dặn n�
 
 Trong Second Brain v3:
 - trap có `seen` từ 2 ngày trở lên mà `enforce: none` là ứng viên;
-- dùng skill `sua-goc` để thực hiện, rồi ghi vào bảng luật ↔ enforcer trong `AGENTS.md`.
+- dùng skill `root-fix` để thực hiện, rồi ghi vào bảng luật ↔ enforcer trong `AGENTS.md`.

@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Sửa bug theo kiểu test đỏ trước - viết test nhỏ nhất bắt được lỗi, chạy thấy fail đúng lý do, rồi mới sửa và chạy thấy pass. Dùng khi sửa bug có đường test rẻ, khi user gõ /tdd, hoặc khi playbook sua-bug của skill lam gọi tới.
+description: Sửa bug theo kiểu test đỏ trước - viết test nhỏ nhất bắt được lỗi, chạy thấy fail đúng lý do, rồi mới sửa và chạy thấy pass. Dùng khi sửa bug có đường test rẻ, khi user gõ /tdd, hoặc khi playbook bug-fix của skill work gọi tới.
 ---
 
 # tdd — test đỏ trước, sửa sau

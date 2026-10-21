@@ -12,7 +12,7 @@ v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/s
 - ✅ pha 1: benchmark;
 - ✅ pha 2: CLI core;
 - ✅ pha 3: hook cho Claude Code và omp;
-- ✅ pha 4: lớp thực thi (`skills/`: lam + 8 playbook + 12 nguyên tắc, hieu, tdd, soi, sua-goc, nhat-ky);
+- ✅ pha 4: lớp thực thi (`skills/`: work + 8 playbook + 12 nguyên tắc, explain, tdd, cross-review, root-fix, decision-log);
 - ✅ pha 5: đo lường (`ingest`, `stats`, `brief-lint`, `clean`, `promote`);
 - ✅ pha 6: bench v3.
 

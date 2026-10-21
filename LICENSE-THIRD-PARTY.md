@@ -2,7 +2,7 @@
 
 ## pstack
 
-Phần `skills/` (lam, playbook, nguyên tắc, hieu, tdd, soi, sua-goc, nhat-ky) được viết lại bằng tiếng Việt và chỉnh cho Second Brain v3, dựa trên **pstack** (https://github.com/cursor/plugins/tree/main/pstack, v0.15.29, đọc ngày 2026-10-21), tác giả Lauren Tan, phát hành theo giấy phép MIT:
+Phần `skills/` (work, playbook, nguyên tắc, explain, tdd, cross-review, root-fix, decision-log) được viết lại bằng tiếng Việt và chỉnh cho Second Brain v3, dựa trên **pstack** (https://github.com/cursor/plugins/tree/main/pstack, v0.15.29, đọc ngày 2026-10-21), tác giả Lauren Tan, phát hành theo giấy phép MIT:
 
 ```
 MIT License

@@ -190,25 +190,25 @@ Thêm ở pha 5:
 
 Viết lại từ pstack (MIT, ghi nguồn ở `LICENSE-THIRD-PARTY.md`), bằng tiếng Việt, nằm trong `skills/`.
 
-`brain init` link skill vào `<codebase>/.claude/skills/`, theo thứ tự ưu tiên: symlink, rồi junction, rồi copy. Các link được thêm vào `.git/info/exclude`. Lệnh `brain skills install [--global]` dùng để cài lại. Block CLAUDE.md trỏ tới `skills/lam/SKILL.md`, để agent không có cơ chế skill (như omp) vẫn đọc được.
+`brain init` link skill vào `<codebase>/.claude/skills/`, theo thứ tự ưu tiên: symlink, rồi junction, rồi copy. Các link được thêm vào `.git/info/exclude`. Lệnh `brain skills install [--global]` dùng để cài lại. Block CLAUDE.md trỏ tới `skills/work/SKILL.md`, để agent không có cơ chế skill (như omp) vẫn đọc được.
 
-- **`lam`** (`skills/lam/SKILL.md`) là router. Model tự gọi được, không cần user gõ `/lam`.
+- **`work`** (`skills/work/SKILL.md`) là router. Model tự gọi được, không cần user gõ `/work`.
   - Chọn playbook, chép các bước vào todo. Không có tool todo thì in checklist, và câu trả lời cuối đánh dấu từng bước `✓` / `skip: lý do`.
   - Áp nguyên tắc, mỗi khẳng định gắn nhãn **[đo] / [suy] / [đoán]**.
   - Có 6 luật bắt buộc, trong đó có "đọc quyết định và trap trước khi code" và "chứng minh bằng `brain verify`".
-- **Playbook (8), ở `skills/lam/playbooks/`:** `dieu-tra` · `sua-bug` · `tinh-nang` · `refactor` · `hieu-nang` · `prototype` · `chay-qua-dem` · `tam-dung-tiep-tuc`.
-- **Nguyên tắc (12), ở `skills/lam/nguyen-tac/`:** `lam-it` · `nen-mong` · `bot-truoc-them-sau` · `mo-hinh-hoa-mien` · `ranh-gioi` · `idempotent` · `sua-tan-goc` · `chung-minh` · `don-vi-kiem-duoc` · `giai-thich-con-so` · `giu-context` · `ma-hoa-bai-hoc`.
-- **Skill phụ (5):** `hieu` (how) · `tdd` · `soi` (review đa model opus + sonnet) · `sua-goc` (correct, bậc 3) · `nhat-ky` (decision log TSV ở `journal/`).
+- **Playbook (8), ở `skills/work/playbooks/`:** `investigate` · `bug-fix` · `feature` · `refactor` · `performance` · `prototype` · `overnight` · `pause-resume`.
+- **Nguyên tắc (12), ở `skills/work/principles/`:** `laziness` · `foundations` · `subtract-first` · `model-the-domain` · `boundaries` · `idempotent` · `root-causes` · `prove-it` · `verifiable-units` · `explain-the-number` · `guard-context` · `encode-lessons`.
+- **Skill phụ (5):** `explain` (how) · `tdd` · `cross-review` (review đa model opus + sonnet) · `root-fix` (correct, bậc 3) · `decision-log` (decision log TSV ở `journal/`).
 - **Autonomy theo Harness:**
   - việc đảo ngược được thì cứ làm;
-  - **spawn subagent hoặc team phải qua Cổng 2 và được user duyệt**. Ngoại lệ: user gõ `/soi` hoặc `/hieu`, hoặc đã cho phép trong playbook `chay-qua-dem`;
+  - **spawn subagent hoặc team phải qua Cổng 2 và được user duyệt**. Ngoại lệ: user gõ `/cross-review` hoặc `/explain`, hoặc đã cho phép trong playbook `overnight`;
   - force-push, deploy, xoá dữ liệu luôn phải dừng hỏi.
 
-**Kiểm thật ngày 2026-10-21** (`claude -p`, Sonnet, adapter `bench/brains/v3.py`), prompt không nhắc tới `lam`:
+**Kiểm thật ngày 2026-10-21** (`claude -p`, Sonnet, adapter `bench/brains/v3.py`), prompt không nhắc tới `work`:
 
 | Task | Kết quả | Chi phí | Chi tiết |
 |---|---|---|---|
-| T05 | pass 2/2 | $0.24–0.26 | Agent tự gọi skill `lam` và đọc `sua-bug.md` + `sua-tan-goc.md`. Có nhãn [đo]/[suy]. Tự chạy `brain verify B-001`. Ghi CONTEXT. |
+| T05 | pass 2/2 | $0.24–0.26 | Agent tự gọi skill `work` và đọc `bug-fix.md` + `root-causes.md`. Có nhãn [đo]/[suy]. Tự chạy `brain verify B-001`. Ghi CONTEXT. |
 | T06 | pass 2/2 | $0.24–0.26 | Làm đúng ADR-004 (v2 baseline là 0/3). Checklist 9 bước ✓/skip ở câu trả lời cuối. |
 
 Chưa đạt: ở chế độ headless, agent không in checklist trước khi bắt đầu làm, chỉ có ở câu trả lời cuối.

@@ -1,16 +1,16 @@
 ---
-name: hieu
-description: Giải thích một subsystem hoặc luồng code ("X hoạt động thế nào", "luồng Y đi qua đâu") ở mức một kỹ sư senior onboard, đủ để dựng mô hình trong đầu. Dùng khi user hỏi cách hoạt động, hoặc khi playbook của skill lam yêu cầu bước hieu trước khi sửa.
+name: explain
+description: Giải thích một subsystem hoặc luồng code ("X hoạt động thế nào", "luồng Y đi qua đâu") ở mức một kỹ sư senior onboard, đủ để dựng mô hình trong đầu. Dùng khi user hỏi cách hoạt động, hoặc khi playbook của skill work yêu cầu bước explain trước khi sửa.
 ---
 
-# hieu — giải thích cách một phần code hoạt động
+# explain — giải thích cách một phần code hoạt động
 
 Viết lại từ skill `how` của pstack (MIT).
 
 ## 1. Đánh giá độ phức tạp
 Phạm vi mơ hồ thì nói cách bạn hiểu câu hỏi rồi bắt đầu đọc. User có thể chỉnh hướng.
 - **Đơn giản** (một module, một hàm, một câu hỏi hẹp): tự đọc và giải thích trong một lượt. Phân vân thì chọn đường đơn giản.
-- **Phức tạp** (một subsystem trải nhiều file hoặc service, một tính năng cắt ngang): chia câu hỏi thành 2–4 góc nhìn riêng. Muốn giao mỗi góc cho một subagent Explore chỉ-đọc chạy song song thì nêu kế hoạch và đợi user duyệt. Nếu user đã gõ `/hieu` cho câu hỏi phức tạp thì coi như đã duyệt. Không thì tự đọc lần lượt từng góc.
+- **Phức tạp** (một subsystem trải nhiều file hoặc service, một tính năng cắt ngang): chia câu hỏi thành 2–4 góc nhìn riêng. Muốn giao mỗi góc cho một subagent Explore chỉ-đọc chạy song song thì nêu kế hoạch và đợi user duyệt. Nếu user đã gõ `/explain` cho câu hỏi phức tạp thì coi như đã duyệt. Không thì tự đọc lần lượt từng góc.
 
 ## 2. Đọc
 - Đọc memory trước: CONTEXT `Kiến trúc`, `decisions/INDEX.md`, và trap có trigger trùng với vùng này.
