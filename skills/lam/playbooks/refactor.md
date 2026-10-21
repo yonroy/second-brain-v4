@@ -2,7 +2,7 @@
 
 **Bạn giữ contract. Cấu trúc đổi, behavior không đổi.** Phát hiện bug hoặc thiếu tính năng thì tách ra việc riêng. Ship thay đổi cấu trúc trước, dựa trên contract đã ghim.
 
-1. **Đọc quyết định liên quan.** Ví dụ, quy định đổi tên API là phải migrate hết caller rồi xoá tên cũ.
+1. **Đọc quyết định liên quan và lập bản đồ caller.** Chạy `brain graph uses <tên>` cho mọi tên sắp đổi (gồm alias, `partial`, chuỗi trong config/data). Đọc `brain recall` theo tên đó để biết lý do code tồn tại. Ví dụ, quy định đổi tên API là phải migrate hết caller rồi xoá tên cũ.
 2. **Ghim behavior** trước khi dời bất cứ thứ gì: test đặc tả, snapshot hoặc script so output cũ và mới. Vùng chưa có test thì viết pin trước. Type check và lint không tính là pin.
 3. **Gọi tên cấu trúc còn thiếu và hình dạng đích** (`nguyen-tac/mo-hinh-hoa-mien.md`, `nguyen-tac/nen-mong.md`). Cấu trúc mới phải xoá được nhánh hoặc trạng thái sai, không chỉ thêm một lớp gián tiếp.
 4. **Bớt trước, thêm sau** (`nguyen-tac/bot-truoc-them-sau.md`): xoá code chết, gộp wrapper chỉ có một caller, bỏ validate thừa.

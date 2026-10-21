@@ -95,3 +95,55 @@ class CodeGraphTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SurfaceTests(unittest.TestCase):
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def hook(self, p, tool_input, sid="s1"):
+        from brain.recall import surface
+        return surface.context_for_tool(p, {"session_id": sid, "tool_input": tool_input})
+
+    def test_file_context_has_commit_reason(self):
+        from brain.recall import surface
+        self.tmp, p = staged("T19")
+        ctx = surface.file_context(p, "src/phone.py", 800)
+        self.assertIn("Incident #12", ctx)
+        self.assertLessEqual(len(ctx), 800)
+
+    def test_decision_linked_through_defined_names(self):
+        from brain.recall import surface
+        self.tmp, p = staged("T18")
+        self.assertIn("ADR-031", surface.file_context(p, "src/notify.py", 800))
+
+    def test_rename_warning_and_once_per_session(self):
+        self.tmp, p = staged("T12")
+        edit = {"file_path": str(p.codebase / "src" / "handlers.py"),
+                "old_string": "def handle_order_paid(evt):", "new_string": "def on_order_paid(evt):"}
+        first = self.hook(p, edit)
+        self.assertIn("`handle_order_paid` còn được dùng ở", first)
+        self.assertIn("data/schedules.json", first)
+        again = self.hook(p, {"file_path": edit["file_path"]})
+        self.assertNotIn("brain context", again, "file context goes out once per session")
+
+    def test_budget_caps_non_essential_text(self):
+        from brain.recall import surface
+        self.tmp, p = staged("T20")
+        led = surface.Ledger.load(p, "b")
+        led.budget = 50
+        self.assertFalse(led.take("file:a", "x" * 60))
+        self.assertTrue(led.take("trap:M-1", "y" * 60, essential=True))
+
+    def test_prompt_recall_finds_old_conversation(self):
+        from brain.recall import surface
+        self.tmp, p = staged("T22")
+        text = surface.context_for_prompt(p, {"session_id": "s", "prompt": "Thêm weekly_totals tổng doanh thu theo tuần cho khách ACME"})
+        self.assertIn("ISO", text)
+
+    def test_start_lists_few_decisions_when_many(self):
+        from brain.recall import surface
+        self.tmp, p = staged("T18")
+        picked, rest = surface.relevant_decisions(p, 8)
+        self.assertLessEqual(len(picked), 8)
+        self.assertEqual(len(picked) + rest, len([d for d in p.decisions() if d.status.startswith("active")]))

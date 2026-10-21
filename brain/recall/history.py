@@ -240,3 +240,22 @@ def about_file(p: Project, rel: str, limit: int = 4) -> list[Hit]:
     commits.sort(key=lambda h: (h.date, h.ref), reverse=True)
     others.sort(key=lambda h: (h.date, h.ref), reverse=True)
     return (commits[:1] + others)[:limit]
+
+
+def mentions(p: Project, names: list[str], kinds=("decision", "archive", "journal", "work"), limit: int = 3) -> list[Hit]:
+    """Units that name one of these identifiers (functions/classes defined in a file) verbatim."""
+    names = [n for n in names if len(n) >= 4]
+    if not names or not db_path(p).exists():
+        return []
+    con = connect(p)
+    q = " OR ".join(f'"{norm(n)}"' for n in names[:20])
+    marks = ",".join("?" * len(kinds))
+    rows = con.execute(f"SELECT kind, ref, date, path, files, text, bm25(units) FROM units WHERE units MATCH ? "
+                       f"AND kind IN ({marks}) ORDER BY bm25(units) LIMIT ?", [q, *kinds, limit * 4]).fetchall()
+    con.close()
+    out = []
+    for r in rows:
+        if any(re.search(rf"(?<![A-Za-z0-9_]){re.escape(n)}(?![A-Za-z0-9_])", r[5]) for n in names):
+            out.append(_hit(r[:6], -r[6]))
+    out.sort(key=lambda h: (h.kind != "decision", -h.score, h.ref))
+    return out[:limit]

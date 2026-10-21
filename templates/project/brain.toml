@@ -14,3 +14,9 @@ tester = []
 context_lines = 120
 line_chars = 400
 fact_stale_days = 30
+
+[recall]
+budget_chars = 4000      # tổng ký tự tiêm mỗi phiên (ADR-011)
+file_chars = 800
+prompt_hits = 3
+start_decisions = 8     # quyết định liên quan in lúc mở phiên (ADR-012)

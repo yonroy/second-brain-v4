@@ -20,6 +20,10 @@
 3. Fact quá hạn hoặc không có tag: kiểm trên repo trước khi dùng. Nếu sai thì sửa CONTEXT.
 4. Kiến thức của model: không dùng làm số hay cấu hình.
 
+## Tra lịch sử và code graph
+- `brain recall "<từ khoá>"`: journal cũ, quyết định (cả đã thay), archive, commit.
+- `brain graph uses <tên>`: mọi chỗ dùng, kể cả alias và chuỗi trong config/data. Chạy trước khi đổi hoặc xoá API.
+
 ## Trước khi code
 - Đọc các quyết định và trap mà `brain start` in ra. Việc chạm đúng chủ đề đó thì làm theo, không làm ngược.
 - tiny (dưới 30 phút, không đổi contract): làm luôn.

@@ -105,10 +105,19 @@ def start_text(p: Project, hook: dict | None = None, max_traps: int = 5) -> str:
     out = [f"=== brain start · {p.name} · {date.today().isoformat()} ===", gate.summary(p, findings)]
     out += [f"  {f}" for f in findings if f.level == gate.RED]
     out += ["", f"--- CONTEXT ({paths.fwd(p.file('CONTEXT.md'))}) ---", *_context_lines(p)]
-    active = [d for d in p.decisions() if d.status.startswith("active")]
-    if active:
-        out += ["", "--- Quyết định đang hiệu lực (decisions/INDEX.md) — làm theo, không làm ngược ---"]
-        out += [f"- {d.id} ({d.date}) {d.summary}" for d in active[:15]]
+    from brain.recall import code, history, surface
+    try:  # catch-up: whatever the last SessionEnd did not index (spec v4 §6)
+        history.build(p)
+        code.build(p)
+    except Exception as e:  # noqa: BLE001 — a broken index must never break the session
+        out.append(f"(brain index lỗi: {e}; chạy `brain index --full`)")
+    picked, rest = surface.relevant_decisions(p, surface.limits(p)["decisions"])
+    if picked or rest:
+        out += ["", "--- Quyết định liên quan (decisions/INDEX.md) — làm theo, không làm ngược ---"]
+        out += [f"- {d.id} ({d.date}) {d.summary}" for d in picked]
+        if rest:
+            out.append(f"- … {rest} quyết định khác đang hiệu lực: `brain recall \"<chủ đề>\" --kind decision`. "
+                       "Quyết định gắn với file sẽ hiện khi bạn mở file đó.")
     traps = sorted(p.traps(), key=lambda t: t.last_seen, reverse=True)
     if traps:
         out += ["", f"--- Trap gần nhất ({len(traps[:max_traps])}/{len(traps)}, đủ ở TRAPS.md) ---"]

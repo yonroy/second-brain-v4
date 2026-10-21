@@ -181,8 +181,35 @@ def cmd_index(a) -> int:
     return 0
 
 
+def cmd_context(a) -> int:
+    from brain.recall import surface
+    if a.hook:
+        hook = session.read_hook_input()
+        p = _project(a, hook)
+        if p is None:
+            return 0
+        text = surface.context_for_tool(p, hook)
+        if text:
+            print(surface.hook_json("PreToolUse", text))
+        return 0
+    p = _project(a)
+    from brain.traps import _rel
+    rel = _rel(p, a.path)
+    print(surface.file_context(p, rel, surface.limits(p)["file"]) or f"(không có context cho {rel})")
+    return 0
+
+
 def cmd_recall(a) -> int:
-    from brain.recall import history
+    from brain.recall import history, surface
+    if a.hook:
+        hook = session.read_hook_input()
+        p = _project(a, hook)
+        if p is None:
+            return 0
+        text = surface.context_for_prompt(p, hook)
+        if text:
+            print(surface.hook_json("UserPromptSubmit", text))
+        return 0
     p = _project(a)
     hits = history.search(p, a.query, a.kind, a.file, a.limit)
     if not hits:
@@ -370,8 +397,15 @@ def main(argv=None) -> int:
     s.add_argument("--hook", action="store_true")
     s.set_defaults(fn=cmd_index)
 
+    s = sub.add_parser("context", help="xem trước file context mà hook sẽ tiêm khi Read/Edit file này")
+    s.add_argument("path", nargs="?", default="")
+    s.add_argument("--hook", action="store_true", help="PreToolUse: trap + file context + cảnh báo đổi tên")
+    s.set_defaults(fn=cmd_context)
+
     s = sub.add_parser("recall", help="tìm trong lịch sử: journal, quyết định, archive, commit")
-    s.add_argument("query")
+    s.add_argument("query", nargs="?", default="")
+    s.add_argument("--hook", action="store_true", help="UserPromptSubmit: trap kw + lịch sử liên quan tới prompt")
+    s.add_argument("--prompt", action="store_true", help="(giữ cho tương thích; --hook đã đọc prompt)")
     s.add_argument("--kind", choices=["journal", "decision", "trap", "work", "archive", "commit"])
     s.add_argument("--file", help="ưu tiên mục nhắc tới file này")
     s.add_argument("--limit", type=int, default=5)

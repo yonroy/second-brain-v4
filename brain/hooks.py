@@ -23,11 +23,11 @@ def desired() -> dict[str, list[dict]]:
 
     return {
         "SessionStart": [{"matcher": "startup|resume|clear|compact", "hooks": [h("start --hook")]}],
-        "UserPromptSubmit": [{"hooks": [h("trap-check --hook --prompt", 15)]}],
-        "PreToolUse": [{"matcher": TOOL_MATCHER, "hooks": [h("trap-check --hook", 15)]},
+        "UserPromptSubmit": [{"hooks": [h("recall --hook --prompt", 15)]}],
+        "PreToolUse": [{"matcher": TOOL_MATCHER, "hooks": [h("context --hook", 15)]},
                        {"matcher": "Agent|Task", "hooks": [h("brief-lint --hook", 15)]}],
         "Stop": [{"hooks": [h("end --check --hook", 60)]}],
-        "SessionEnd": [{"hooks": [h("ingest claude --hook", 60)]}],
+        "SessionEnd": [{"hooks": [h("ingest claude --hook", 60), h("index --hook", 120)]}],
     }
 
 

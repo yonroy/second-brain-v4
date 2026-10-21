@@ -78,6 +78,7 @@ Mỗi nguyên tắc nằm ở `nguyen-tac/<tên>.md`. Đọc file trước khi v
 - `soi`: review đa model một diff.
 - `sua-goc`: biến lỗi lặp lại thành enforcer.
 - `nhat-ky`: log quyết định TSV cho việc dài.
+- `nho`: tra lịch sử dài (`brain recall`) và code graph (`brain graph uses`) trước khi đoán.
 
 ## Câu trả lời cuối
 

@@ -5,7 +5,7 @@
 1. **Intake.** Phân loại tiny, normal hay high-risk.
    - normal: tạo `work/S-NNN-<slug>.md` từ `work/_template.md`, ghi proof `B-NNN`.
    - high-risk (đổi schema, API công khai, auth, tiền): thêm ADR trước khi code.
-2. **Quyết định và trap.** Đối chiếu yêu cầu với `decisions/INDEX.md` và TRAPS. Có quyết định về đúng chủ đề (định dạng dữ liệu, làm tròn, thư viện được phép…) thì code phải theo.
+2. **Quyết định, trap và lịch sử.** Đối chiếu yêu cầu với `decisions/INDEX.md`, TRAPS và `brain recall "<chủ đề>"`. Các quy ước của khách hay của dự án có thể nằm trong journal cũ. Đổi chữ ký API thì chạy `brain graph uses` trước. Có quyết định về đúng chủ đề (định dạng dữ liệu, làm tròn, thư viện được phép…) thì code phải theo.
 3. **Hiểu vùng bị chạm** bằng skill `hieu`, hoặc đọc trực tiếp nếu vùng nhỏ.
 4. **Gọi tên dữ liệu.** Chọn kiểu, bảng hoặc state machine sẽ mang logic, trước khi viết logic (`nguyen-tac/mo-hinh-hoa-mien.md`, `nguyen-tac/nen-mong.md`). Có nhiều hình dạng hợp lý thì viết 2 phương án bằng vài dòng rồi chọn có lý do.
 5. **Throughput checkpoint**, 4 dòng trong todo. Dòng không áp dụng thì ghi `n/a: <lý do>`.
