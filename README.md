@@ -19,11 +19,11 @@ v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/s
 **Trạng thái v4:**
 - ✅ pha 0: spec;
 - ✅ pha 1: hub V4 (env `SECOND_BRAIN_V4_ROOT`, marker `SECOND-BRAIN-V4`, `brain hooks migrate`);
-- ⏳ pha 2: bench T17–T24;
-- ⏳ pha 3: index;
-- ⏳ pha 4: đưa ra cho agent;
-- ⏳ pha 5: đo;
-- ⏳ pha 6: bench v4;
+- ✅ pha 2: bench T17–T24;
+- ✅ pha 3: index (`brain index` / `recall` / `graph`);
+- ✅ pha 4: đưa ra cho agent (file context, cảnh báo đổi tên, recall theo prompt, ngân sách);
+- 🔄 pha 5: đo (chưa đọc sổ ghi tiêm vào `runs.sqlite`);
+- ✅ pha 6: bench v4. **v4 24/24 (100%) so với v3 14/24 (58%)** trên T17–T24, xem [docs/bench/20261022-v3-vs-v4.md](docs/bench/20261022-v3-vs-v4.md);
 - ⏳ pha 7: wiki.
 
 ## CLI `brain`
