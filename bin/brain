@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# python3 on Windows may be the Microsoft Store stub, so probe before using it.
+if python3 -c "" >/dev/null 2>&1; then PY=python3; else PY=python; fi
+exec "$PY" "$(dirname "$0")/brain.py" "$@"

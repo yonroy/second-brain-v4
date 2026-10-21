@@ -1,0 +1,16 @@
+version = 3
+name = "{{NAME}}"
+codebase = "{{CODEBASE}}"
+created = "{{DATE}}"
+agents = ["claude", "omp"]
+modules = ["core"]
+
+[roles]
+# tên agent omp theo vai trò, dùng cho brain stats (pha 5)
+reviewer = []
+tester = []
+
+[limits]
+context_lines = 120
+line_chars = 400
+fact_stale_days = 30
