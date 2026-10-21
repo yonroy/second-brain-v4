@@ -56,20 +56,13 @@ def _proof(seed: Seed) -> str:
                       "## Khoảng trống đã biết", ""])
 
 
-def _index(work: Path, hub: Path) -> None:
-    """`brain index` once it exists (phase 3); before that the v4 adapter equals v3 with v4 packaging."""
-    from brain import cli
-    if not hasattr(cli, "cmd_index"):
-        return
-    import os
-    from unittest import mock
-    with mock.patch.dict(os.environ, {"SECOND_BRAIN_V4_ROOT": str(hub)}):
-        old = os.getcwd()
-        os.chdir(work)
-        try:
-            cli.main(["index"])
-        finally:
-            os.chdir(old)
+def _index(work: Path, hub: Path, name: str) -> None:
+    """Build .index/ (history + code graph) the way `brain index` would."""
+    from brain.project import Project
+    from brain.recall import code, history
+    p = Project(hub / "_projects" / name)
+    history.build(p, full=True)
+    code.build(p, full=True)
 
 
 class V4(Brain):
@@ -93,7 +86,7 @@ class V4(Brain):
                   f"## Context\n{d.why}\n\n## Decision\n{d.decision}\n")
         write(proj / "PROOF.md", _proof(seed))
         render_history(hub, seed)
-        _index(work, hub)
+        _index(work, hub, seed.name)
         return Env(extra_env={"SECOND_BRAIN_V4_ROOT": fwd(hub)}, add_dirs=[hub])
 
     def memory_paths(self, work: Path, hub: Path, seed: Seed) -> list[Path]:

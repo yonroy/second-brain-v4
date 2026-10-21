@@ -168,6 +168,49 @@ def cmd_promote(a) -> int:
     return 0
 
 
+def cmd_index(a) -> int:
+    from brain.recall import code, history
+    p = _project(a, session.read_hook_input() if getattr(a, "hook", False) else None)
+    if p is None:
+        return 0
+    h = history.build(p, a.full)
+    c = code.build(p, a.full)
+    if not getattr(a, "hook", False):
+        print(f"history: {h['total']} đơn vị ({h['files']} file đổi, {h['commits']} commit mới) · "
+              f"code: {c['files']} file ({c['changed']} đổi), {c['defs']} định nghĩa")
+    return 0
+
+
+def cmd_recall(a) -> int:
+    from brain.recall import history
+    p = _project(a)
+    hits = history.search(p, a.query, a.kind, a.file, a.limit)
+    if not hits:
+        print("(không có kết quả — `brain index` đã chạy chưa?)")
+    for h in hits:
+        body = " ".join(h.text.split())
+        print(f"- [{h.kind} {h.ref} {h.date}] {body[:260]}" + (f"  · file: {', '.join(h.files[:4])}" if h.files else ""))
+    return 0
+
+
+def cmd_graph(a) -> int:
+    from brain.recall import code
+    p = _project(a)
+    if a.what == "uses":
+        refs = code.uses(p, a.target)
+        print(f"{a.target}: {len(refs)} chỗ dùng" + (" (gồm alias)" if refs else ""))
+        for r in refs:
+            print(f"  {r.path}:{r.line}  [{r.kind}]")
+    elif a.what == "defines":
+        for r in code.defines(p, a.target):
+            print(f"  {r.path}:{r.line}")
+    elif a.what == "dependents":
+        print("\n".join(f"  {x}" for x in code.dependents(p, a.target)) or "  (không có)")
+    else:
+        print("\n".join(f"  {x}" for x in code.deps(p, a.target)) or "  (không có)")
+    return 0
+
+
 def cmd_skills(a) -> int:
     codebase = None if a.global_ else _project(a).codebase
     for name, how in skills.install(codebase, global_=a.global_):
@@ -321,6 +364,23 @@ def main(argv=None) -> int:
     s = sub.add_parser("promote", help="trap đủ điều kiện lên bậc 3 / lên _global")
     s.add_argument("--min-days", type=int, default=2)
     s.set_defaults(fn=cmd_promote)
+
+    s = sub.add_parser("index", help="dựng / cập nhật index lịch sử + code graph (.index/)")
+    s.add_argument("--full", action="store_true", help="dựng lại từ đầu")
+    s.add_argument("--hook", action="store_true")
+    s.set_defaults(fn=cmd_index)
+
+    s = sub.add_parser("recall", help="tìm trong lịch sử: journal, quyết định, archive, commit")
+    s.add_argument("query")
+    s.add_argument("--kind", choices=["journal", "decision", "trap", "work", "archive", "commit"])
+    s.add_argument("--file", help="ưu tiên mục nhắc tới file này")
+    s.add_argument("--limit", type=int, default=5)
+    s.set_defaults(fn=cmd_recall)
+
+    s = sub.add_parser("graph", help="code graph: uses / defines / dependents / deps")
+    s.add_argument("what", choices=["uses", "defines", "dependents", "deps"])
+    s.add_argument("target")
+    s.set_defaults(fn=cmd_graph)
 
     s = sub.add_parser("version")
     s.set_defaults(fn=lambda _a: print(f"brain {VERSION}") or 0)
