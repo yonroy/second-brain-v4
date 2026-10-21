@@ -207,29 +207,40 @@ Viết lại từ pstack (MIT, ghi nguồn trong `LICENSE-THIRD-PARTY.md`), bằ
 
 ## 9. Benchmark (ADR-007)
 
+Chi tiết cách chạy: `bench/README.md`.
+
 - `bench/tasks/<id>/` gồm:
+  - `task.toml`: prompt, loại, `memory_keywords`;
   - `repo/`: fixture;
   - `seed.toml`: tri thức trung lập (facts, traps, decisions, proofs);
-  - `prompt.md`;
-  - `check.py`: checker ẩn, agent không thấy.
-- `bench/brains/<v>/adapter.py` theo hợp đồng `setup(workdir, seed) -> env` · `teardown()` · `memory_paths()`. Các adapter có sẵn: `none`, `v1`, `v2` (gọi `D:\SecondBrainV2\Harness\bin\harness.ps1 init --level L1`), `v3`.
-- `brain bench run --brain none,v1,v2,v3 --agent claude --repeat 3` chạy agent headless trong thư mục tạm, với permission riêng cho bench.
-- **Điểm mỗi lần chạy:**
-  - pass checker;
-  - tránh được trap;
-  - memory được cập nhật đúng;
-  - claim bịa;
-  - token, $, phút.
-- `bench report` in trung bình ± độ lệch theo version, và báo khi chênh lệch nhỏ hơn độ lệch (không kết luận).
-- **8 task ban đầu:**
-  1. Bug có bẫy môi trường.
-  2. Feature nhỏ có proof.
-  3. Phải dùng fact cũ đúng.
-  4. Bị cài fact quá hạn.
-  5. Phải ghi memory cuối phiên.
-  6. Quyết định đã có ADR, đừng làm ngược.
-  7. Retry/idempotency.
-  8. Task nhiều bước cần phân rã.
+  - `check.py`: checker ẩn, nằm ngoài thư mục chạy nên agent không thấy;
+  - `solution/`: lời giải mẫu. `python -m bench validate` kiểm repo gốc fail và lời giải pass.
+- `bench/brains/<v>.py` theo hợp đồng `setup(work, hub, seed) -> Env` · `memory_paths()` · `teardown()`. Các adapter có sẵn:
+  - `none`;
+  - `v1`;
+  - `v2`: gọi `harness.sh init --level L1` của `D:\SecondBrainV2\Harness` qua Git Bash. Bản `.ps1` bị treo khi chạy từ runner.
+- Chạy: `python -m bench run --brain none,v1,v2 --repeat 3 --model sonnet`. Mỗi lượt có:
+  - repo, `git init` và một hub riêng trong `D:\_brainbench\…`;
+  - `claude -p` với `--permission-mode bypassPermissions`, `--setting-sources project,local` (bỏ hook của user), `--strict-mcp-config`, `--no-session-persistence`.
+- Prompt nào cũng có thêm câu "không hỏi lại, tự quyết", giống nhau cho mọi brain. Không gõ nghi lễ ("đọc"/"xong").
+- **Điểm mỗi lượt:**
+  - `pass`: checker ẩn;
+  - `trap_avoided`;
+  - `read_memory`: tool call chạm vào hub;
+  - `memory_updated`: dòng mới trong memory chứa keyword;
+  - `ran_tests`;
+  - `claim_unbacked`: nói pass/xanh mà không có lệnh test (Bash/PowerShell);
+  - `cost_usd`, `duration_s`, `tokens_in/out`, `turns`.
+- `python -m bench report <jsonl…>` in trung bình ± độ lệch theo brain và ma trận pass theo task. Kết quả lưu ở `_metrics/bench/<ngày>-<label>.jsonl`.
+- **8 task:**
+  - T01: file sinh tự động (trap);
+  - T02: slugify có đ/Đ (trap + proof);
+  - T03: dùng fact API nội bộ;
+  - T04: fact cổng DB quá hạn;
+  - T05: ghi bài học cuối phiên;
+  - T06: ADR tiền int + half-up;
+  - T07: retry idempotent;
+  - T08: đổi tên API, xoá tên cũ (ADR).
 
 ## 10. Module
 
