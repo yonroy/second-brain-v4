@@ -17,6 +17,7 @@ from bench import score
 from bench.brains import get_brain
 from bench.brains.base import fwd
 from bench.tasks import Task
+from brain.metrics import ledger
 
 PACKAGE = Path(__file__).resolve().parent.parent
 HUB = Path(os.environ.get("SECOND_BRAIN_V4_ROOT", PACKAGE.parent))
@@ -79,6 +80,15 @@ def _forget_claude_project(work: Path) -> None:
         shutil.rmtree(d, ignore_errors=True)
 
 
+INJECTION_KEYS = ("recall_injected", "context_injected", "rename_warnings", "budget_used")
+
+
+def injection(hub: Path) -> dict:
+    """stream-json hides hook additionalContext; the Recall ledger in the run's hub is the record (v4 only)."""
+    inj = ledger.from_dirs(sorted(hub.glob("_projects/*/.state")))
+    return {k: inj[k] for k in INJECTION_KEYS}
+
+
 def run_one(spec: RunSpec, batch_dir: Path, timeout: int) -> dict:
     task, brain = spec.task, get_brain(spec.brain)
     run_dir = batch_dir / f"{task.id}-{spec.brain}-r{spec.repeat}"
@@ -102,6 +112,7 @@ def run_one(spec: RunSpec, batch_dir: Path, timeout: int) -> dict:
         markers = [fwd(p).lower() for p in mem_paths] + [f"_projects/{seed.name}/".lower()] * bool(mem_paths)
         row.update(score.score_run(events, markers, before, after, task.memory_keywords, has_memory=bool(mem_paths)))
         row["wall_s"] = round(time.time() - t0, 1)
+        row.update(injection(hub))
         res = score.final_result(events)
         if res.get("api_error_status") == 429 or "hit your session limit" in str(res.get("result", "")):
             raise QuotaExhausted(str(res.get("result", "429")))

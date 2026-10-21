@@ -6,6 +6,7 @@ from pathlib import Path
 
 from bench import report, score
 from bench.brains import get_brain
+from bench.brains.v2 import V2_PACKAGE
 from bench.tasks import all_tasks, select
 
 
@@ -47,6 +48,7 @@ class AdapterTests(unittest.TestCase):
         self.assertIn("MEMORY/CONTEXT.md", (self.work / "CLAUDE.md").read_text(encoding="utf-8"))
         self.assertEqual(env.add_dirs, [self.hub])
 
+    @unittest.skipUnless(V2_PACKAGE.is_dir(), "v2 Harness package not on this machine (e.g. inside WSL)")
     def test_v2_runs_real_init_and_seeds(self):
         b = get_brain("v2")
         env = b.setup(self.work, self.hub, self.seed)

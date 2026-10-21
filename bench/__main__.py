@@ -51,8 +51,12 @@ def cmd_run(a) -> int:
 
 
 def cmd_rescore(a) -> int:
-    """Re-run hidden checkers on preserved work dirs after a checker fix; rewrites the JSONL in place."""
+    """Re-run hidden checkers on preserved work dirs after a checker fix; rewrites the JSONL in place.
+
+    Also refreshes the Recall injection counters from the run's hub ledger (rows written before phase 5 lack them).
+    """
     import json
+    from bench.runner import injection
     from bench.score import load_events
     from bench.tasks import load_task, TASKS_DIR
     path = Path(a.file)
@@ -70,6 +74,8 @@ def cmd_rescore(a) -> int:
             changed += 1
             print(f"{r['task']} {r['brain']} r{r['repeat']}: pass {r.get('pass')} → {res.get('pass')}")
         r.update(res)
+        if (run_dir / "hub").exists():
+            r.update(injection(run_dir / "hub"))
         r["rescored"] = True
     path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
     print(f"Đã chấm lại, {changed} lượt đổi kết quả.")

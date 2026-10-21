@@ -16,10 +16,14 @@ import re
 from pathlib import Path
 
 from brain import paths
-from brain.metrics import omp_parse as op
+from brain.metrics import ledger, omp_parse as op
+from brain.recall.text import paths_in
 
 IDLE_CAP = 300.0
 SHELL_TOOLS = {"Bash", "PowerShell"}
+FOLLOW_WINDOW = 5  # tool calls after an injection in which a suggested file counts as followed
+TRAP_RE = re.compile(r"brain trap (M-\d+)")
+SUBJECT_RE = re.compile(r"brain context `([^`]+)`")
 
 
 def slug(path) -> str:
@@ -60,7 +64,9 @@ def parse(path: Path, memory_root: Path, prices: dict | None = None) -> dict | N
     errors = 0
     last_text = ""
     corpus, results = [], []
-    traps_injected = stop_blocks = 0
+    trap_ids: set[str] = set()
+    stop_blocks = suggested = followed = 0
+    pending: list[list] = []  # [paths still unvisited, tool calls left]
     sid = ""
     mem = paths.fwd(memory_root).lower().rstrip("/") + "/"
     reads = {"traps": 0, "context": 0, "decisions": 0}
@@ -79,8 +85,16 @@ def parse(path: Path, memory_root: Path, prices: dict | None = None) -> dict | N
             if typ == "attachment":
                 a = e.get("attachment") or {}
                 out = str(a.get("stdout", "")) + str(a.get("content", ""))
-                if a.get("type", "").startswith("hook") and "brain trap" in out:
-                    traps_injected += out.count("brain trap M-")
+                if a.get("type", "").startswith("hook"):
+                    # newer Claude Code logs one injection twice (hook_success stdout + hook_additional_context),
+                    # and brain sends each trap once per session, so distinct ids are the count
+                    trap_ids.update(TRAP_RE.findall(out))
+                if a.get("type") == "hook_additional_context" and ("brain context" in out or "còn được dùng ở" in out):
+                    subject = set(SUBJECT_RE.findall(out))
+                    want = {q.lower() for q in paths_in(out) if q not in subject}
+                    if want:
+                        suggested += len(want)
+                        pending.append([want, FOLLOW_WINDOW])
                 if a.get("type", "").startswith("hook") and '"decision": "block"' in out.replace('":"', '": "'):
                     stop_blocks += 1
                 continue
@@ -98,6 +112,12 @@ def parse(path: Path, memory_root: Path, prices: dict | None = None) -> dict | N
                     tools[c.get("id", str(len(tools)))] = c
                     inp = c.get("input") or {}
                     blob = paths.fwd(json.dumps(inp, ensure_ascii=False).replace("\\\\", "/")).lower()
+                    for item in pending:
+                        hit = {q for q in item[0] if q in blob}
+                        followed += len(hit)
+                        item[0] -= hit
+                        item[1] -= 1
+                    pending = [i for i in pending if i[0] and i[1] > 0]
                     if mem in blob or "/_projects/" in blob:
                         reads["traps"] |= int("traps.md" in blob or "mistakes.md" in blob)
                         reads["context"] |= int("context.md" in blob)
@@ -125,7 +145,8 @@ def parse(path: Path, memory_root: Path, prices: dict | None = None) -> dict | N
     return {"session_id": sid, "started": stamps[0], "minutes": round(active / 60, 1), "turns": len(usage_by_id),
             "tool_calls": len(tools), "tool_errors": errors, "tokens_in": tin, "tokens_out": tout,
             "model": model, "cost_usd": _cost(usage_by_id.values(), prices or {}, model), "reads": reads,
-            "claims": claims, "traps_injected": traps_injected, "stop_blocks": stop_blocks}
+            "claims": claims, "traps_injected": len(trap_ids), "stop_blocks": stop_blocks,
+            "suggested": suggested, "followed": followed}
 
 
 def _cost(usages, prices: dict, model: str) -> float | None:
@@ -165,6 +186,9 @@ def scan(codebase: Path, memory_root: Path, project: str, version: str, since: s
                 run_id = f.stem if parent else main.stem
                 role = next((k for k, names in (roles or {}).items() if agent in (names or [])), "")
                 unbacked = [c for c in r["claims"] if not c.backed]
+                # hooks get the main session id, so the ledger belongs to the main run only
+                spent = None if parent else ledger.load(memory_root / ".state", main.stem)
+                inj = ledger.summarize(spent)
                 rows.append({
                     "source": "claude", "run_id": run_id, "project": project, "brain_version": version, "agent": agent,
                     "role": role, "name": desc or main.stem[:8], "ticket": "", "parent_id": parent, "model": r["model"],
@@ -175,9 +199,13 @@ def scan(codebase: Path, memory_root: Path, project: str, version: str, since: s
                     "cost_usd": r["cost_usd"], "yielded": None, "verdict": "", "p1": None, "p2": None, "p3": None,
                     "read_traps": r["reads"]["traps"], "read_context": r["reads"]["context"],
                     "read_decisions": r["reads"]["decisions"], "brief_missing": "", "claims": len(r["claims"]),
-                    "unbacked_claims": len(unbacked), "traps_injected": r["traps_injected"],
+                    "unbacked_claims": len(unbacked), "traps_injected": max(r["traps_injected"], inj["ledger_traps"] or 0),
                     "stop_blocks": r["stop_blocks"], "file": paths.fwd(f), "ingested": ingested,
+                    "recall_injected": inj["recall_injected"], "context_injected": inj["context_injected"],
+                    "rename_warnings": inj["rename_warnings"], "budget_used": inj["budget_used"],
+                    "suggested_files": r["suggested"], "followed_files": r["followed"],
                 })
                 events += [{"source": "claude", "run_id": run_id, "kind": "claim_unbacked",
                             "detail": f"{c.kind} `{c.text}` — {c.where}"} for c in unbacked]
+                events += ledger.events("claude", run_id, spent)
     return rows, events

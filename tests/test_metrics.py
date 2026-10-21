@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest import mock
 
 from brain import clean, hooks
+from brain.paths import fwd as paths_fwd
 from brain.init import init
 from brain.metrics import claude as mc, omp as mo, store
 from brain.metrics import omp_parse as op
@@ -105,6 +106,61 @@ class ClaudeTests(unittest.TestCase):
             self.assertEqual(r["traps_injected"], 1)
             self.assertEqual(r["cost_usd"], round((11 * 3 + 6 * 15 + 90 * 0.3) / 1e6, 6))
             self.assertEqual(sum(not c.backed for c in r["claims"]), 1, "`pytest` claimed but only unittest ran")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_recall_injections_traps_once_and_followed_suggestions(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            def use(i, path):
+                return {"type": "assistant", "timestamp": f"2026-10-21T10:00:{i:02d}Z", "message": {"id": f"m{i}",
+                        "usage": {"output_tokens": 1}, "content": [{"type": "tool_use", "id": f"t{i}", "name": "Read",
+                                                                     "input": {"file_path": f"D:\\w\\{path}"}}]}}
+
+            def ctx(i, text):  # newer Claude Code logs one injection twice
+                return [{"type": "attachment", "timestamp": f"2026-10-21T10:00:{i:02d}Z", "attachment": {
+                            "type": "hook_success", "toolUseID": f"t{i}", "stdout": json.dumps({"x": text}, ensure_ascii=False)}},
+                        {"type": "attachment", "timestamp": f"2026-10-21T10:00:{i:02d}Z", "attachment": {
+                            "type": "hook_additional_context", "toolUseID": f"t{i}", "content": [text]}}]
+            f = jl(tmp / "s.jsonl", [
+                use(1, "src\\tax.py"),
+                *ctx(1, "⚠️ brain trap M-003 (khớp src/tax.py): x → y\n📎 brain context `src/tax.py`:\n"
+                        "- File phụ thuộc vào file này (2): src/cart.py, scripts/backfill.py"),
+                use(2, "src\\cart.py"),                     # followed (1 call later)
+                *[use(i, "README.md") for i in range(3, 7)],  # scripts/backfill.py not opened in the window
+                use(7, "scripts\\backfill.py"),             # too late: 6th call after the injection
+            ])
+            r = mc.parse(f, tmp)
+            self.assertEqual(r["traps_injected"], 1, "hook_success + hook_additional_context is one injection")
+            self.assertEqual((r["suggested"], r["followed"]), (2, 1))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_scan_reads_ledger_for_main_run_only(self):
+        from brain.metrics import ledger, stats
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            code, mem, root = tmp / "code", tmp / "hub" / "_projects" / "demo", tmp / "projects"
+            d = root / mc.slug(paths_fwd(code))
+            stamp = {"type": "user", "timestamp": "2026-10-21T10:00:00Z", "message": {"content": "x"}}
+            jl(d / "sid1.jsonl", [stamp])
+            jl(d / "sid1" / "subagents" / "agent-a1.jsonl", [stamp])
+            (mem / ".state").mkdir(parents=True)
+            (mem / ".state" / "sid1.ledger.json").write_text(json.dumps(
+                {"hist:journal:j1": 300, "hist:commit:abc": 70, "file:src/x.py": 200, "rename:src/x.py:12ab": 90,
+                 "trap:M-001": 40}), encoding="utf-8")
+            rows, events = mc.scan(code, mem, "demo", "4", root=root)
+            main = next(r for r in rows if r["agent"] == "main")
+            sub = next(r for r in rows if r["agent"] != "main")
+            self.assertEqual((main["recall_injected"], main["context_injected"], main["rename_warnings"],
+                              main["budget_used"], main["traps_injected"]), (2, 1, 1, 700, 1))
+            self.assertIsNone(sub["budget_used"], "subagents share the session id; the ledger is counted once")
+            self.assertEqual(sum(e["kind"] == "injected" for e in events), 5)
+            con = store.connect(tmp / "runs.sqlite")
+            store.upsert(con, rows, events)
+            self.assertIn("| 2 | 1+1⚠️ | 700 |", stats.report(con))
+            self.assertIn("hist:journal:j1 (300 ký tự)", stats.injected(con))
+            self.assertIsNone(ledger.summarize(None)["budget_used"], "no ledger → NULL, not 0")
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 

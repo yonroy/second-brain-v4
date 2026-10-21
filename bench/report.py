@@ -69,6 +69,17 @@ def render(rows: list[dict]) -> str:
             k = sum(1 for r in rs if r.get("pass"))
             cells.append(f"{k}/{len(rs)}" if rs else "—")
         out.append(f"| {t} | {kind} | " + " | ".join(cells) + " |")
+    led = {b: [r for r in by_brain[b] if r.get("budget_used") is not None] for b in brains}
+    if any(led.values()):
+        out += ["", "## Recall đã tiêm (từ sổ ghi của hub)", "",
+                "| Brain | Lượt có sổ ghi | Mục lịch sử / lượt | File context / lượt | Cảnh báo đổi tên / lượt | Ký tự / lượt |",
+                "|---|---|---|---|---|---|"]
+        for b in brains:
+            rs = led[b]
+            if rs:
+                out.append(f"| {b} | {len(rs)}/{len(by_brain[b])} | {_mean_sd(rs, 'recall_injected', '{:.1f}')} | "
+                           f"{_mean_sd(rs, 'context_injected', '{:.1f}')} | {_mean_sd(rs, 'rename_warnings', '{:.1f}')} | "
+                           f"{_mean_sd(rs, 'budget_used', '{:.0f}')} |")
     out += ["", "## Ghi chú đọc số", "",
             "- `±` là độ lệch chuẩn giữa các lượt. Chênh lệch giữa hai brain nhỏ hơn độ lệch thì **chưa kết luận được**.",
             "- `Đọc memory` / `Cập nhật memory` không áp cho `none`.",

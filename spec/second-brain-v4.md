@@ -86,8 +86,15 @@ D:\SecondBrainV4\            env SECOND_BRAIN_V4_ROOT · marker CLAUDE.md SECOND
   - `investigate`: dùng `recall` cho các câu hỏi "vì sao".
 
 ## 9. Đo (bổ sung cho v3 §8)
-- `runs` thêm `recall_injected`, `context_injected`, `budget_used`. `events` thêm `injected:<key>`.
-- `brain stats` thêm số lần tiêm theo loại, cộng proxy "agent mở file được gợi ý trong 5 tool call kế tiếp".
+- **Nguồn:** sổ ghi `.state/<sid>.ledger.json` (`brain/metrics/ledger.py`). Stream-json không hiện additionalContext, còn bench không giữ transcript, nên sổ ghi là bản ghi chuẩn. Đã đối chiếu với transcript của một phiên thật ngày 2026-10-22: khớp số lần tiêm và số ký tự.
+- **`runs` thêm cột:**
+  - `recall_injected` (`hist:*`), `context_injected` (`file:*`), `rename_warnings` (`rename:*`), `budget_used` (tổng ký tự);
+  - `suggested_files` / `followed_files`: proxy, chỉ có khi transcript có `hook_additional_context`.
+  - Không có sổ ghi thì để NULL, không ghi 0. Sổ ghi chỉ gắn vào phiên chính, vì subagent dùng chung session id.
+- **`events`:** thêm `kind = injected`, `detail = <key> (N ký tự)`.
+- **`traps_injected`:** đếm số trap id khác nhau. Claude Code bản mới ghi mỗi lần tiêm hai lần (`hook_success` và `hook_additional_context`), nên đếm theo dòng thì bị gấp đôi.
+- **`brain stats`:** thêm cột Recall / Context tiêm, ký tự tiêm (trung vị), Theo gợi ý. `brain stats --injected` liệt kê từng mục.
+- **Bench:** mỗi dòng có thêm 4 cột tiêm. `bench rescore` điền bù cho các dòng cũ. Report có thêm mục "Recall đã tiêm".
 
 ## 10. Benchmark (bổ sung cho v3 §9)
 - **Seed** thêm `[[history]]` (`kind`, `date`, `text`, `files`) và `[repo_extra]` (sinh file nhiễu tất định).

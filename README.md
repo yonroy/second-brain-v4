@@ -5,7 +5,7 @@ Package cho hub `D:\SecondBrainV4`, clone từ v3 (remote `v3`). v3 ở `D:\Seco
 v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/second-brain-v4.md](spec/second-brain-v4.md), ADR-009..012.
 
 - Spec nền (v3, vẫn còn hiệu lực): [spec/second-brain-v3.md](spec/second-brain-v3.md) · Quyết định: [decisions/INDEX.md](decisions/INDEX.md)
-- Benchmark so các version: [bench/README.md](bench/README.md). Baseline nằm ở `../_metrics/bench/20261021-baseline.md`.
+- Benchmark so các | `stats [--by agent|version|ticket|project] [--unbacked] [--injected]` |: [bench/README.md](bench/README.md). Baseline nằm ở `../_metrics/bench/20261021-baseline.md`.
 
 **Trạng thái v3 (kế thừa):**
 - ✅ pha 0: spec;
@@ -22,7 +22,7 @@ v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/s
 - ✅ pha 2: bench T17–T24;
 - ✅ pha 3: index (`brain index` / `recall` / `graph`);
 - ✅ pha 4: đưa ra cho agent (file context, cảnh báo đổi tên, recall theo prompt, ngân sách);
-- 🔄 pha 5: đo (chưa đọc sổ ghi tiêm vào `runs.sqlite`);
+- ✅ pha 5: đo (sổ ghi tiêm → `runs.sqlite`, `brain stats --injected`, bench có cột tiêm; đối chiếu với transcript thật đã khớp);
 - ✅ pha 6: bench v4. **v4 24/24 (100%) so với v3 14/24 (58%)** trên T17–T24, xem [docs/bench/20261022-v3-vs-v4.md](docs/bench/20261022-v3-vs-v4.md);
 - ⏳ pha 7: wiki.
 
@@ -44,8 +44,8 @@ bin\brain.cmd <lệnh>                                # cmd / PowerShell
 | `start [--hook]` | In gate, CONTEXT, các quyết định đang hiệu lực, 5 trap gần nhất và story đang làm. Ghi lại trạng thái đầu phiên. |
 | `end [--check] [--hook]` | Sinh `journal/<ngày>-<sid>.md` từ transcript. `--check`: code đổi mà memory chưa đổi thì trả `{"decision":"block"}`, tối đa một lần mỗi phiên. |
 | `trap-check [path\|lệnh] [--hook] [--prompt]` | In trap có `trigger` khớp (path glob hoặc `kw:`). Ở chế độ hook, mỗi trap chỉ báo một lần mỗi phiên. |
-| `ingest [claude\|omp\|all] [--since D]` | Đọc transcript Claude Code (Windows) hoặc log omp (chạy trong WSL) vào `_metrics/runs.sqlite`. `--cwd/--name/--version 2 --patterns v2` để đo project v1/v2 làm baseline. |
-| `stats [--by agent\|version\|ticket\|project] [--unbacked]` | Bảng số đo thực tế: phút, lỗi tool, token, $, đọc trap, trap được tiêm, Stop chặn, brief đủ, claim không bằng chứng. |
+| `ingest [claude\|omp\|all] [--since D]` | Đọc transcript Claude Code (Windows) hoặc log omp (chạy trong WSL) vào `_metrics/runs.sqlite`. `--cwd/--name/--| `stats [--by agent|version|ticket|project] [--unbacked] [--injected]` | 2 --patterns v2` để đo project v1/v2 làm baseline. |
+| `stats [--by agent|version|ticket|project] [--unbacked] [--injected]` |\|version\|ticket\|project] [--unbacked]` | Bảng số đo thực tế: phút, lỗi tool, token, $, đọc trap, trap được tiêm, Stop chặn, brief đủ, claim không bằng chứng. |
 | `brief-lint [FILE\|-] [--hook]` | Kiểm brief subagent đủ mục (Mục tiêu · Không làm · Checklist · Đầu ra · Ngân sách). Hook PreToolUse `Agent` chỉ cảnh báo. |
 | `clean backup\|verify-backup DIR\|diff-facts OLD NEW\|retire FILE…` | Port clean-memory v2: không xoá gì, retire cần backup trong ngày, viết lại CONTEXT lớn thì chạy diff-facts trước. |
 | `promote [--min-days 2]` | Trap gặp ≥ 2 ngày mà chưa có enforcer, và trap trùng ở project khác (ứng viên `_global`). |

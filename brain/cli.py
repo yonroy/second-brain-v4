@@ -102,7 +102,8 @@ def cmd_stats(a) -> int:
     from brain.metrics import stats
     con = _db()
     project = a.name or (None if a.all else _project(a).name)
-    print(stats.unbacked(con, project) if a.unbacked else stats.report(con, a.by, project, a.since, a.source))
+    print(stats.unbacked(con, project) if a.unbacked else stats.injected(con, project) if a.injected
+          else stats.report(con, a.by, project, a.since, a.source))
     return 0
 
 
@@ -374,6 +375,7 @@ def main(argv=None) -> int:
     s.add_argument("--name", help="project (mặc định: project của cwd)")
     s.add_argument("--all", action="store_true", help="mọi project")
     s.add_argument("--unbacked", action="store_true", help="liệt kê claim không có lệnh chứng minh")
+    s.add_argument("--injected", action="store_true", help="liệt kê từng mục Recall đã tiêm (từ sổ ghi)")
     s.set_defaults(fn=cmd_stats)
 
     s = sub.add_parser("brief-lint", help="kiểm brief subagent đủ mục (PreToolUse Agent hook)")

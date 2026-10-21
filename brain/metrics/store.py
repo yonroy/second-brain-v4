@@ -18,6 +18,9 @@ COLUMNS = [
     ("read_context", "INTEGER"), ("read_decisions", "INTEGER"), ("brief_missing", "TEXT"),
     ("claims", "INTEGER"), ("unbacked_claims", "INTEGER"), ("traps_injected", "INTEGER"),
     ("stop_blocks", "INTEGER"), ("file", "TEXT"), ("ingested", "TEXT"),
+    # v4 Recall (from the session ledger; NULL = no ledger, e.g. v3 or no brain)
+    ("recall_injected", "INTEGER"), ("context_injected", "INTEGER"), ("rename_warnings", "INTEGER"),
+    ("budget_used", "INTEGER"), ("suggested_files", "INTEGER"), ("followed_files", "INTEGER"),
 ]
 NAMES = [c for c, _ in COLUMNS]
 

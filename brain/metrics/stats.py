@@ -25,6 +25,22 @@ def _fmt(x, nd=1):
     return "—" if x is None else f"{x:.{nd}f}"
 
 
+def _sum(rows, key):
+    vals = [r[key] for r in rows if r.get(key) is not None]
+    return sum(vals) if vals else None
+
+
+def _recall_cols(rs) -> str:
+    """v4 Recall columns; '—' for groups with no ledger at all (v3, omp, no brain)."""
+    led = [r for r in rs if r.get("budget_used") is not None]
+    if not led:
+        return "— | — | — | —"
+    sug, fol = _sum(rs, "suggested_files"), _sum(rs, "followed_files")
+    return (f"{_sum(led, 'recall_injected')} | {_sum(led, 'context_injected')}+{_sum(led, 'rename_warnings')}⚠️ | "
+            f"{_fmt(_median([r['budget_used'] for r in led]), 0)} | "
+            + (f"{fol}/{sug}" if sug else "—"))
+
+
 def report(con: sqlite3.Connection, by: str = "agent", project: str | None = None, since: str | None = None,
            source: str | None = None) -> str:
     where, args = [], []
@@ -48,8 +64,8 @@ def report(con: sqlite3.Connection, by: str = "agent", project: str | None = Non
     out = [f"# brain stats — theo {by}", "",
            f"{len(rows)} run · {dates[0]} → {dates[-1]} · nguồn: {', '.join(sorted({r['source'] for r in rows}))}", "",
            "| Nhóm | Run | Trung vị phút | p90 phút | Lỗi tool % | Trung vị token | $ | Đọc trap | Trap được tiêm | "
-           "Stop chặn | Brief đủ | Claim không bằng chứng |",
-           "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+           "Stop chặn | Brief đủ | Claim không bằng chứng | Recall tiêm | Context tiêm | Ký tự tiêm (trung vị) | Theo gợi ý |",
+           "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for g, rs in sorted(groups.items(), key=lambda kv: (-len(kv[1]), kv[0])):
         mins = [r["minutes"] for r in rs if r["minutes"] is not None]
         calls = sum(r["tool_calls"] or 0 for r in rs)
@@ -63,11 +79,24 @@ def report(con: sqlite3.Connection, by: str = "agent", project: str | None = Non
             f"{_rate(rs, 'read_traps')} | {sum(r['traps_injected'] or 0 for r in rs) if any(r['traps_injected'] is not None for r in rs) else '—'} | "
             f"{sum(r['stop_blocks'] or 0 for r in rs) if any(r['stop_blocks'] is not None for r in rs) else '—'} | "
             f"{(str(sum(1 for r in briefs if not r['brief_missing'])) + '/' + str(len(briefs))) if briefs else '—'} | "
-            f"{sum(r['unbacked_claims'] or 0 for r in rs)} |")
+            f"{sum(r['unbacked_claims'] or 0 for r in rs)} | {_recall_cols(rs)} |")
     out += ["", "- Phút = thời gian làm thật (omp: theo đoạn yield như v2; Claude: khoảng giữa các sự kiện, mỗi khoảng tối đa 5′).",
             "- $ omp = usage.cost (giá list). $ Claude chỉ có khi `[metrics.prices]` trong brain.toml có giá cho model.",
-            "- `brain stats --unbacked` liệt kê từng claim không có lệnh chứng minh."]
+            "- Recall/Context tiêm, ký tự tiêm: từ sổ ghi `.state/<sid>.ledger.json` của phiên chính (v4). "
+            "Context = file context + ⚠️ cảnh báo đổi tên.",
+            "- Theo gợi ý = file được gợi ý trong context mà agent chạm tới trong 5 tool call kế tiếp / tổng file được gợi ý "
+            "(proxy, chỉ có khi transcript ghi `hook_additional_context`).",
+            "- `brain stats --unbacked` liệt kê từng claim không có lệnh chứng minh · `--injected` liệt kê từng mục đã tiêm."]
     return "\n".join(out)
+
+
+def injected(con: sqlite3.Connection, project: str | None = None, limit: int = 60) -> str:
+    q = ("SELECT r.date, r.name, e.detail FROM events e JOIN runs r USING (source, run_id) "
+         "WHERE e.kind = 'injected'" + (" AND r.project = ?" if project else "") + " ORDER BY r.started DESC, e.detail LIMIT ?")
+    rows = con.execute(q, ([project] if project else []) + [limit]).fetchall()
+    if not rows:
+        return "Chưa có mục nào được tiêm (hoặc chưa `brain ingest`)."
+    return "\n".join(f"- {r['date']} `{r['name']}` {r['detail']}" for r in rows)
 
 
 def unbacked(con: sqlite3.Connection, project: str | None = None, limit: int = 30) -> str:
