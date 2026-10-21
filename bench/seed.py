@@ -36,6 +36,11 @@ class Decision:
     title: str
     decision: str
     why: str
+    status: str = "active"   # or "superseded by ADR-NNN"
+
+    @property
+    def active(self) -> bool:
+        return self.status == "active"
 
 
 @dataclass

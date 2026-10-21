@@ -41,7 +41,7 @@ def _traps(seed: Seed) -> str:
 
 
 def _decisions(seed: Seed) -> str:
-    rows = [f"| {d.id} | {d.date} | {d.title}: {d.decision} | active |" for d in seed.decisions]
+    rows = [f"| {d.id} | {d.date} | {d.title}: {d.decision} | {d.status} |" for d in seed.decisions]
     return "\n".join([f"# {seed.name} — Decisions", "", "| ID | Ngày | Tóm tắt | Trạng thái |",
                       "|---|---|---|---|", *rows]) + "\n"
 

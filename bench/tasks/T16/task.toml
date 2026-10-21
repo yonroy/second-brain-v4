@@ -1,0 +1,5 @@
+id = "T16"
+title = "Mã giảm giá: nhiều bước, quyết định làm tròn, bẫy áp hai lần"
+kind = "multi"
+prompt = "Thêm mã giảm giá theo phần trăm: viết `apply_coupon(cart, code)` trong `src/cart.py` (mã hợp lệ nằm trong `COUPONS` của `src/coupons.py`; trả `True` nếu áp được, `False` nếu mã không hợp lệ), và sửa `checkout(cart)` để `total` là tổng sau giảm và order trả về có thêm khoá `coupon`."
+memory_keywords = ["apply_coupon"]

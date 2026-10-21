@@ -1,0 +1,82 @@
+[project]
+name = "wallet"
+summary = "Ví điện tử nội bộ"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-12"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "CI chạy trên GitHub Actions, nhánh mặc định `main`, staging deploy từ nhánh `staging`"
+date = "2026-10-03"
+source = "file:.github/workflows/ci.yml"
+
+[[facts]]
+section = "arch"
+text = "Log ghi dạng JSON một dòng qua module `logging` chuẩn"
+date = "2026-10-05"
+source = "D-091"
+
+[[decisions]]
+id = "ADR-001"
+date = "2026-09-20"
+title = "Chỉ dùng thư viện chuẩn Python"
+decision = "Không thêm dependency ngoài vào dự án."
+why = "Repo chạy trên máy build khoá mạng."
+
+[[decisions]]
+id = "D-091"
+date = "2026-10-05"
+title = "Log JSON một dòng"
+decision = "Mọi log dùng logging chuẩn, formatter JSON một dòng; không print()."
+why = "Log được gom về Loki."
+
+[[decisions]]
+id = "D-092"
+date = "2026-10-06"
+title = "Commit message theo Conventional Commits"
+decision = "feat:/fix:/refactor:/docs:/test:, tiếng Anh, ≤ 72 ký tự dòng đầu."
+why = "Changelog tự sinh."
+
+[[traps]]
+id = "M-090"
+title = "Docker volume trên WSL bị lỗi quyền ghi"
+trigger = ["docker-compose.yml", "kw:docker"]
+symptom = "Permission denied khi container ghi vào ./data"
+fix = "Chạy docker từ WSL với user 1000:1000, không mount từ /mnt/c."
+seen = ["2026-09-18"]
+
+[[traps]]
+id = "M-091"
+title = "pre-commit hook chạy chậm khi repo có node_modules"
+trigger = [".pre-commit-config.yaml", "kw:pre-commit"]
+symptom = "commit mất > 1 phút"
+fix = "Thêm node_modules vào exclude của pre-commit."
+seen = ["2026-09-25"]
+
+[[traps]]
+id = "M-092"
+title = "pnpm trong WSL xoá node_modules"
+trigger = ["package.json", "kw:pnpm"]
+symptom = "node_modules biến mất sau pnpm install trong /mnt/d"
+fix = "Chạy pnpm từ PowerShell."
+seen = ["2026-08-02", "2026-09-14"]
+
+[[decisions]]
+id = "ADR-015"
+date = "2026-10-09"
+title = "Hàm public của wallet trả Result, không raise"
+decision = "Trả {'ok': bool, 'error': mã trong src/errors.py hoặc None}. Không raise cho lỗi nghiệp vụ. `withdraw` còn raise là legacy chưa migrate, đừng bắt chước."
+why = "API gateway map mã lỗi sang thông báo cho người dùng; exception làm lộ stacktrace."
+
+[[decisions]]
+id = "ADR-004"
+date = "2026-09-28"
+title = "Tiền là số nguyên đồng"
+decision = "Mọi số tiền là int; số tiền <= 0 là INVALID_AMOUNT."
+why = "Đối soát."

@@ -1,0 +1,5 @@
+id = "T10"
+title = "Quyết định mới thay quyết định cũ, code mẫu vẫn theo cách cũ"
+kind = "decision"
+prompt = "Thêm hàm `format_eta(order_time, hours)` trong `src/delivery.py` trả về chuỗi giờ giao dự kiến để hiển thị cho khách, dạng `HH:MM dd/mm/yyyy`. `order_time` là datetime có timezone."
+memory_keywords = ["format_eta"]

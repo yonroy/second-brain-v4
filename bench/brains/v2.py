@@ -70,7 +70,8 @@ def _decisions_log(seed: Seed) -> str:
 
 
 def _adr(d) -> str:
-    return (f"# {d.id} — {d.title}\n\n**Ngày:** {d.date} · **Trạng thái:** Accepted\n\n"
+    status = "Accepted" if d.active else d.status.replace("superseded by", "Superseded by")
+    return (f"# {d.id} — {d.title}\n\n**Ngày:** {d.date} · **Trạng thái:** {status}\n\n"
             f"## Context\n{d.why}\n\n## Decision\n{d.decision}\n\n## Consequences\n- Áp dụng cho mọi thay đổi liên quan.\n")
 
 

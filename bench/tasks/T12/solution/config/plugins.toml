@@ -1,0 +1,3 @@
+[events]
+"order.created" = "src.handlers:handle_order_created"
+"order.paid" = "src.handlers:on_order_paid"

@@ -1,0 +1,5 @@
+id = "T13"
+title = "Phân trang không bao giờ hết + retry"
+kind = "trap"
+prompt = "Viết `sync_products(api, conn)` trong `src/sync.py`: lấy toàn bộ sản phẩm từ API nhà cung cấp (`ProductsAPI`, có phân trang) và lưu vào bảng `products`."
+memory_keywords = ["sync_products", "has_more"]

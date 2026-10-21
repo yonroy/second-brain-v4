@@ -1,0 +1,5 @@
+id = "T09"
+title = "CSV cho kế toán: nhiều quy ước cùng lúc"
+kind = "multi"
+prompt = "Viết hàm `export_revenue_csv(path)` trong `src/report.py` ghi báo cáo doanh thu (cột: ngày, khách hàng, số tiền) ra file CSV để phòng kế toán mở bằng Excel."
+memory_keywords = ["export_revenue_csv"]

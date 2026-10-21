@@ -1,0 +1,5 @@
+id = "T12"
+title = "Đổi tên handler có tham chiếu bằng chuỗi ngoài *.py"
+kind = "trap"
+prompt = "Đổi tên `handle_order_paid` thành `on_order_paid` theo quy ước đặt tên handler mới."
+memory_keywords = ["on_order_paid"]

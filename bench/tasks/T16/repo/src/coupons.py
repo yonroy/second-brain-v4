@@ -1,0 +1,1 @@
+COUPONS = {"SALE10": 10, "VIP25": 25}

@@ -23,7 +23,7 @@ def _context(seed: Seed) -> str:
             out += ["---", "", f"## {SECTION_TITLES[key]}"] + [f"- {f.text}" for f in facts] + [""]
     if seed.decisions:
         out += ["---", "", "## Quyết định kiến trúc quan trọng"]
-        out += [f"- {d.title} — {d.why}" for d in seed.decisions] + [""]
+        out += [f"- {d.title} — {d.why}" + ("" if d.active else f" (ĐÃ THAY: {d.status})") for d in seed.decisions] + [""]
     out += ["---", "", "## Environment / Config", f"- **Test:** `{seed.test_cmd}`"]
     out += [f"- {f.text}" for f in seed.facts_in("env")]
     out += ["", "<!-- AI INSTRUCTIONS: Đọc file này trước khi bắt đầu. Nếu thông tin không đủ, hỏi lại. "
@@ -35,6 +35,8 @@ def _decisions(seed: Seed) -> str:
     out = [f"# Decisions — {seed.name}", "Lịch sử quyết định kiến trúc. Chỉ append, không xóa.", "---"]
     for d in seed.decisions:
         out += ["", f"### [{d.date}] {d.title}", f"- Quyết định: {d.decision}", f"- Lý do: {d.why}"]
+        if not d.active:
+            out.append(f"- Trạng thái: {d.status}")
     return "\n".join(out) + "\n"
 
 

@@ -1,0 +1,9 @@
+[
+  {
+    "cron": "0 * * * *",
+    "handler": "handle_order_paid",
+    "payload": {
+      "id": "batch"
+    }
+  }
+]

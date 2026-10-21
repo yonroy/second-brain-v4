@@ -1,0 +1,83 @@
+[project]
+name = "events"
+summary = "Bộ xử lý sự kiện đơn hàng"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-12"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "CI chạy trên GitHub Actions, nhánh mặc định `main`, staging deploy từ nhánh `staging`"
+date = "2026-10-03"
+source = "file:.github/workflows/ci.yml"
+
+[[facts]]
+section = "arch"
+text = "Log ghi dạng JSON một dòng qua module `logging` chuẩn"
+date = "2026-10-05"
+source = "D-091"
+
+[[decisions]]
+id = "ADR-001"
+date = "2026-09-20"
+title = "Chỉ dùng thư viện chuẩn Python"
+decision = "Không thêm dependency ngoài vào dự án."
+why = "Repo chạy trên máy build khoá mạng."
+
+[[decisions]]
+id = "D-091"
+date = "2026-10-05"
+title = "Log JSON một dòng"
+decision = "Mọi log dùng logging chuẩn, formatter JSON một dòng; không print()."
+why = "Log được gom về Loki."
+
+[[decisions]]
+id = "D-092"
+date = "2026-10-06"
+title = "Commit message theo Conventional Commits"
+decision = "feat:/fix:/refactor:/docs:/test:, tiếng Anh, ≤ 72 ký tự dòng đầu."
+why = "Changelog tự sinh."
+
+[[traps]]
+id = "M-090"
+title = "Docker volume trên WSL bị lỗi quyền ghi"
+trigger = ["docker-compose.yml", "kw:docker"]
+symptom = "Permission denied khi container ghi vào ./data"
+fix = "Chạy docker từ WSL với user 1000:1000, không mount từ /mnt/c."
+seen = ["2026-09-18"]
+
+[[traps]]
+id = "M-091"
+title = "pre-commit hook chạy chậm khi repo có node_modules"
+trigger = [".pre-commit-config.yaml", "kw:pre-commit"]
+symptom = "commit mất > 1 phút"
+fix = "Thêm node_modules vào exclude của pre-commit."
+seen = ["2026-09-25"]
+
+[[traps]]
+id = "M-092"
+title = "pnpm trong WSL xoá node_modules"
+trigger = ["package.json", "kw:pnpm"]
+symptom = "node_modules biến mất sau pnpm install trong /mnt/d"
+fix = "Chạy pnpm từ PowerShell."
+seen = ["2026-08-02", "2026-09-14"]
+
+[[decisions]]
+id = "ADR-006"
+date = "2026-10-05"
+title = "Đổi tên API nội bộ: migrate hết caller rồi xoá tên cũ trong cùng thay đổi"
+decision = "Không để alias hay wrapper tương thích; đổi mọi chỗ gọi (kể cả config, dữ liệu) rồi xoá tên cũ."
+why = "Alias cũ bị agent sau copy lại."
+
+[[traps]]
+id = "M-041"
+title = "Handler được gọi theo tên trần trong data/schedules.json"
+trigger = ["src/handlers.py", "kw:handle_order"]
+symptom = "Đổi tên handler, test xanh, nhưng cron job lỗi AttributeError lúc chạy thật"
+fix = "Tìm tên handler trong mọi file (config/*.toml, data/*.json), không chỉ *.py; test hiện không phủ run_schedules."
+seen = ["2026-09-21", "2026-10-07"]

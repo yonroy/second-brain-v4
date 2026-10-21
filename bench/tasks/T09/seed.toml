@@ -1,0 +1,83 @@
+[project]
+name = "sales-report"
+summary = "Báo cáo doanh thu cho phòng kế toán"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-12"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "CI chạy trên GitHub Actions, nhánh mặc định `main`, staging deploy từ nhánh `staging`"
+date = "2026-10-03"
+source = "file:.github/workflows/ci.yml"
+
+[[facts]]
+section = "arch"
+text = "Log ghi dạng JSON một dòng qua module `logging` chuẩn"
+date = "2026-10-05"
+source = "D-091"
+
+[[decisions]]
+id = "ADR-001"
+date = "2026-09-20"
+title = "Chỉ dùng thư viện chuẩn Python"
+decision = "Không thêm dependency ngoài vào dự án."
+why = "Repo chạy trên máy build khoá mạng."
+
+[[decisions]]
+id = "D-091"
+date = "2026-10-05"
+title = "Log JSON một dòng"
+decision = "Mọi log dùng logging chuẩn, formatter JSON một dòng; không print()."
+why = "Log được gom về Loki."
+
+[[decisions]]
+id = "D-092"
+date = "2026-10-06"
+title = "Commit message theo Conventional Commits"
+decision = "feat:/fix:/refactor:/docs:/test:, tiếng Anh, ≤ 72 ký tự dòng đầu."
+why = "Changelog tự sinh."
+
+[[traps]]
+id = "M-090"
+title = "Docker volume trên WSL bị lỗi quyền ghi"
+trigger = ["docker-compose.yml", "kw:docker"]
+symptom = "Permission denied khi container ghi vào ./data"
+fix = "Chạy docker từ WSL với user 1000:1000, không mount từ /mnt/c."
+seen = ["2026-09-18"]
+
+[[traps]]
+id = "M-091"
+title = "pre-commit hook chạy chậm khi repo có node_modules"
+trigger = [".pre-commit-config.yaml", "kw:pre-commit"]
+symptom = "commit mất > 1 phút"
+fix = "Thêm node_modules vào exclude của pre-commit."
+seen = ["2026-09-25"]
+
+[[traps]]
+id = "M-092"
+title = "pnpm trong WSL xoá node_modules"
+trigger = ["package.json", "kw:pnpm"]
+symptom = "node_modules biến mất sau pnpm install trong /mnt/d"
+fix = "Chạy pnpm từ PowerShell."
+seen = ["2026-08-02", "2026-09-14"]
+
+[[decisions]]
+id = "ADR-010"
+date = "2026-10-08"
+title = "Định dạng CSV gửi kế toán"
+decision = "Phân cách bằng dấu chấm phẩy `;` (Excel locale VN), mã hoá utf-8-sig (có BOM), ngày dd/mm/yyyy, số tiền là số nguyên đồng không phân cách nghìn."
+why = "Excel ở máy kế toán dùng locale vi-VN: dấu phẩy là dấu thập phân."
+
+[[traps]]
+id = "M-011"
+title = "Excel hiển thị lỗi tiếng Việt khi CSV thiếu BOM"
+trigger = ["src/report.py", "kw:csv"]
+symptom = "Kế toán thấy 'Nguyá»…n' thay vì 'Nguyễn'"
+fix = "Ghi file với encoding='utf-8-sig'."
+seen = ["2026-09-30", "2026-10-08"]

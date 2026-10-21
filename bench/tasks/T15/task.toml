@@ -1,0 +1,5 @@
+id = "T15"
+title = "Hợp đồng lỗi kiểu Result, ví dụ gần nhất lại raise"
+kind = "decision"
+prompt = "Thêm hàm `transfer(wallets, src, dst, amount)` trong `src/wallet.py` chuyển tiền giữa hai ví."
+memory_keywords = ["transfer"]

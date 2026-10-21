@@ -1,0 +1,5 @@
+id = "T14"
+title = "Sắp xếp tiếng Việt: bài học không hiển nhiên phải được ghi lại"
+kind = "capture"
+prompt = "Danh sách khách hàng đang sắp xếp sai thứ tự tiếng Việt (`tests/test_customers.py` fail). Sửa `sort_customers`."
+memory_keywords = ["sort_customers", "sắp xếp", "collation", "ă", "ơ", "đ"]

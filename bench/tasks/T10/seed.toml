@@ -1,0 +1,91 @@
+[project]
+name = "delivery"
+summary = "Theo dõi giao hàng"
+stack = "Python 3.14, chỉ thư viện chuẩn"
+test_cmd = "python -m unittest discover -s tests -t ."
+
+[[facts]]
+section = "env"
+text = "Chạy test: `python -m unittest discover -s tests -t .` từ thư mục gốc repo"
+date = "2026-10-12"
+source = "file:README.md"
+
+[[facts]]
+section = "env"
+text = "CI chạy trên GitHub Actions, nhánh mặc định `main`, staging deploy từ nhánh `staging`"
+date = "2026-10-03"
+source = "file:.github/workflows/ci.yml"
+
+[[facts]]
+section = "arch"
+text = "Log ghi dạng JSON một dòng qua module `logging` chuẩn"
+date = "2026-10-05"
+source = "D-091"
+
+[[decisions]]
+id = "ADR-001"
+date = "2026-09-20"
+title = "Chỉ dùng thư viện chuẩn Python"
+decision = "Không thêm dependency ngoài vào dự án."
+why = "Repo chạy trên máy build khoá mạng."
+
+[[decisions]]
+id = "D-091"
+date = "2026-10-05"
+title = "Log JSON một dòng"
+decision = "Mọi log dùng logging chuẩn, formatter JSON một dòng; không print()."
+why = "Log được gom về Loki."
+
+[[decisions]]
+id = "D-092"
+date = "2026-10-06"
+title = "Commit message theo Conventional Commits"
+decision = "feat:/fix:/refactor:/docs:/test:, tiếng Anh, ≤ 72 ký tự dòng đầu."
+why = "Changelog tự sinh."
+
+[[traps]]
+id = "M-090"
+title = "Docker volume trên WSL bị lỗi quyền ghi"
+trigger = ["docker-compose.yml", "kw:docker"]
+symptom = "Permission denied khi container ghi vào ./data"
+fix = "Chạy docker từ WSL với user 1000:1000, không mount từ /mnt/c."
+seen = ["2026-09-18"]
+
+[[traps]]
+id = "M-091"
+title = "pre-commit hook chạy chậm khi repo có node_modules"
+trigger = [".pre-commit-config.yaml", "kw:pre-commit"]
+symptom = "commit mất > 1 phút"
+fix = "Thêm node_modules vào exclude của pre-commit."
+seen = ["2026-09-25"]
+
+[[traps]]
+id = "M-092"
+title = "pnpm trong WSL xoá node_modules"
+trigger = ["package.json", "kw:pnpm"]
+symptom = "node_modules biến mất sau pnpm install trong /mnt/d"
+fix = "Chạy pnpm từ PowerShell."
+seen = ["2026-08-02", "2026-09-14"]
+
+[[decisions]]
+id = "ADR-002"
+date = "2025-05-10"
+title = "Mọi thời gian dùng UTC"
+decision = "Lưu và hiển thị thời gian theo UTC."
+why = "Đơn giản hoá khi còn một múi giờ."
+status = "superseded by ADR-012"
+
+[[decisions]]
+id = "ADR-012"
+date = "2026-10-10"
+title = "Giờ hiển thị cho khách theo giờ Việt Nam"
+decision = "Lưu trữ vẫn UTC; mọi chuỗi giờ hiển thị cho khách đổi sang UTC+7 (Asia/Ho_Chi_Minh). `timeutil.stamp` là legacy cho log nội bộ, không dùng cho khách."
+why = "Khách phàn nàn giờ giao lệch 7 tiếng."
+
+[[traps]]
+id = "M-012"
+title = "ZoneInfo('Asia/Ho_Chi_Minh') lỗi trên Windows thiếu tzdata"
+trigger = ["src/delivery.py", "kw:zoneinfo"]
+symptom = "ZoneInfoNotFoundError trên máy build Windows (không được cài tzdata vì ADR-001)"
+fix = "Dùng timezone(timedelta(hours=7)) — Việt Nam không có giờ mùa hè."
+seen = ["2026-10-10"]
