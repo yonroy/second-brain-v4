@@ -111,9 +111,9 @@ class ScoreTests(unittest.TestCase):
 
 
 class TaskTests(unittest.TestCase):
-    def test_eight_tasks_with_seeds(self):
+    def test_all_tasks_have_seeds(self):
         tasks = all_tasks()
-        self.assertEqual([t.id for t in tasks], [f"T0{i}" for i in range(1, 9)])
+        self.assertEqual([t.id for t in tasks], [f"T{i:02d}" for i in range(1, 17)])
         for t in tasks:
             self.assertTrue(t.seed().test_cmd)
 
