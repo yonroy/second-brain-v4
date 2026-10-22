@@ -93,6 +93,55 @@ class CodeGraphTests(unittest.TestCase):
         self.assertTrue({"sql/reports/top_customers.sql", "dashboards/sales.json", "src/schema.py"} <= files, files)
 
 
+class JsGraphTests(unittest.TestCase):
+    """JS/TS regex graph: defs, `@/` tsconfig paths, relative imports, `{ a as b }` aliases, rename warning."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        root = self.tmp / "app"
+        files = {
+            "tsconfig.json": '{\n  // comment\n  "compilerOptions": {"paths": {"@/*": ["./*"]},},\n}',
+            "lib/ai/auto-run.ts": "export function shouldAutoRun(x: number): boolean {\n  return x > 1;\n}\n"
+                                  "export const MAX_TURNS = 3;\nexport type RunMode = 'a' | 'b';\n"
+                                  "const helper = async (a: string): Promise<void> => {};\n",
+            "lib/ai/index.ts": "export { shouldAutoRun as decideAutoRun } from './auto-run';\n",
+            "app/api/chat/route.ts": "import { shouldAutoRun } from \"@/lib/ai/auto-run\";\nshouldAutoRun(2);\n",
+            "components/chat.tsx": "import { decideAutoRun as go } from '../lib/ai';\nexport default function Chat() {\n  go(1);\n}\n",
+            "README.md": "Gọi `shouldAutoRun` trước khi chạy.\n",
+        }
+        for rel, text in files.items():
+            (root / rel).parent.mkdir(parents=True, exist_ok=True)
+            (root / rel).write_text(text, encoding="utf-8")
+        hub = self.tmp / "hub" / "_projects" / "app"
+        hub.mkdir(parents=True)
+        self.p = mock.Mock(spec=Project)
+        self.p.codebase, self.p.root, self.p.config = root, hub, {}
+        code.build(self.p)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_defs_imports_and_alias_chain(self):
+        p = self.p
+        self.assertEqual([(r.path, r.line) for r in code.defines(p, "shouldAutoRun")], [("lib/ai/auto-run.ts", 1)])
+        names = {n for n, _ in code.defs_in(p, "lib/ai/auto-run.ts")}
+        self.assertTrue({"shouldAutoRun", "MAX_TURNS", "RunMode", "helper"} <= names, names)
+        self.assertEqual(code.dependents(p, "lib/ai/auto-run.ts"), ["app/api/chat/route.ts", "lib/ai/index.ts"],
+                         "`@/` via tsconfig paths and './auto-run' relative")
+        self.assertEqual(code.deps(p, "components/chat.tsx"), ["lib/ai/index.ts"], "'../lib/ai' → index.ts")
+        files = {(r.path, r.kind) for r in code.uses(p, "shouldAutoRun")}
+        self.assertIn(("components/chat.tsx", "code"), files, "alias chain decideAutoRun → go")
+        self.assertIn(("README.md", "doc"), files)
+
+    def test_rename_warning_for_ts(self):
+        from brain.recall import surface
+        warn = surface.rename_warning(self.p, "lib/ai/auto-run.ts", {
+            "old_string": "export function shouldAutoRun(x: number): boolean {",
+            "new_string": "export function shouldRun(x: number): boolean {"})
+        self.assertIn("`shouldAutoRun` còn được dùng ở", warn)
+        self.assertIn("app/api/chat/route.ts:1", warn)
+
+
 if __name__ == "__main__":
     unittest.main()
 

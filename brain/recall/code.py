@@ -3,11 +3,16 @@
 Python via `ast`: definitions, imports (resolved to repo files), names/attributes used, `import x as y`
 aliases (so `_tr(...)` counts as a use of `tax_rate`), string constants. Every other text file contributes its
 identifiers as `string` (config/data/sql) or `doc` (markdown) references, which catches names referenced from
-JSON/TOML/SQL that a `*.py`-only grep misses (bench T12/T21). Other languages: identifiers only — a heuristic.
+JSON/TOML/SQL that a `*.py`-only grep misses (bench T12/T21).
+JS/TS (`.js .jsx .ts .tsx .mjs .cjs`): regex heuristic (spec §5) — top-level/exported function, class, arrow-const,
+interface/type/enum definitions; `import … from` / `export … from` / `require()` / `import()` resolved to repo files
+(relative paths and tsconfig `compilerOptions.paths`, e.g. `@/*`); `{ a as b }` aliases. Not a parser: decorators,
+re-export chains and dynamic names are missed. Other languages: identifiers only.
 """
 from __future__ import annotations
 
 import ast
+import json
 import re
 import sqlite3
 import subprocess
@@ -18,7 +23,22 @@ from brain import paths
 from brain.project import Project
 
 TEXT_EXT = {".py", ".toml", ".json", ".yaml", ".yml", ".sql", ".md", ".ini", ".cfg", ".html", ".js", ".ts", ".tsx",
-            ".jsx", ".go", ".rs", ".java", ".txt", ".csv", ".sh"}
+            ".jsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".txt", ".csv", ".sh"}
+JS_EXT = (".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs")
+JS_RESOLVE = ("", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", "/index.ts", "/index.tsx", "/index.js", "/index.jsx")
+_ID = r"([A-Za-z_$][\w$]*)"
+JS_DEFS = [
+    (re.compile(r"^(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*" + _ID), "function"),
+    (re.compile(r"^\s*export\s+(?:default\s+)?(?:async\s+)?function\s*\*?\s*" + _ID), "function"),
+    (re.compile(r"^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+" + _ID), "class"),
+    (re.compile(r"^(?:export\s+)?(?:const|let|var)\s+" + _ID + r"\s*(?::[^=]{0,200})?=\s*(?:async\s+)?"
+                r"(?:\([^)]*\)\s*(?::[^=]{0,120})?=>|[A-Za-z_$][\w$]*\s*=>|function\b)"), "function"),
+    (re.compile(r"^\s*export\s+(?:const|let|var)\s+" + _ID), "const"),
+    (re.compile(r"^\s*(?:export\s+)?(?:declare\s+)?(?:interface|type|enum)\s+" + _ID), "type"),
+]
+JS_IMPORT = re.compile(r"(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)[\"']([^\"'\n]+)[\"']")
+JS_NAMED = re.compile(r"\b(?:import|export)\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?\{([^}]*)\}\s*from", re.S)
+JS_AS = re.compile(r"\s*(?:type\s+)?" + _ID + r"\s+as\s+" + _ID)
 SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "__pycache__", ".claude", ".index", "dist", "build"}
 IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
 MAX_BYTES = 512 * 1024
@@ -147,6 +167,75 @@ def _index_python(rel: str, text: str, files: set[str]) -> _PyVisitor | None:
     return v
 
 
+def ts_paths(root: Path) -> list[tuple[str, str]]:
+    """tsconfig/jsconfig `compilerOptions.paths` as (prefix, replacement), e.g. `"@/*": ["./*"]` → ("@/", "")."""
+    for name in ("tsconfig.json", "jsconfig.json"):
+        f = root / name
+        if not f.is_file():
+            continue
+        raw = f.read_text(encoding="utf-8", errors="ignore")
+        raw = re.sub(r"^\s*//.*$", "", raw, flags=re.M)
+        raw = re.sub(r",(\s*[}\]])", r"\1", raw)
+        try:
+            opts = json.loads(raw).get("compilerOptions", {})
+        except ValueError:
+            return []
+        base = (opts.get("baseUrl") or ".").replace("\\", "/").lstrip("./").rstrip("/")
+        out = []
+        for pat, targets in (opts.get("paths") or {}).items():
+            if pat.endswith("*") and targets and str(targets[0]).endswith("*"):
+                tgt = str(targets[0])[:-1].replace("\\", "/")
+                while tgt.startswith("./"):
+                    tgt = tgt[2:]
+                out.append((pat[:-1], (base + "/" if base else "") + tgt))
+        return out
+    return []
+
+
+def _resolve_js(spec: str, rel: str, files: set[str], aliases: list[tuple[str, str]]) -> str | None:
+    if spec.startswith("."):
+        parts = rel.split("/")[:-1]
+        for seg in spec.split("/"):
+            if seg == "..":
+                parts = parts[:-1]
+            elif seg not in (".", ""):
+                parts.append(seg)
+        base = "/".join(parts)
+    else:
+        base = next((repl + spec[len(pre):] for pre, repl in aliases if spec.startswith(pre)), None)
+        if base is None:
+            return None  # a package, not a repo file
+    for ext in JS_RESOLVE:
+        if base + ext in files:
+            return base + ext
+    return None
+
+
+def _index_js(rel: str, text: str, files: set[str], path_aliases: list[tuple[str, str]]) -> dict:
+    out = {"defs": [], "refs": [], "imports": [], "aliases": []}
+    seen = set()
+    for i, line in enumerate(text.splitlines(), 1):
+        for rx, kind in JS_DEFS:
+            m = rx.match(line)
+            if m:
+                out["defs"].append((m.group(1), m.group(1), kind, rel, i))
+                break
+        for tok in IDENT.findall(line):
+            if (tok, i) not in seen:
+                seen.add((tok, i))
+                out["refs"].append((tok, rel, i, "code"))
+    for m in JS_IMPORT.finditer(text):
+        t = _resolve_js(m.group(1), rel, files, path_aliases)
+        if t and t != rel:
+            out["imports"].append((rel, t, text.count("\n", 0, m.start()) + 1))
+    for m in JS_NAMED.finditer(text):
+        for part in m.group(1).split(","):
+            a = JS_AS.match(part)
+            if a and a.group(1) != "default":
+                out["aliases"].append((rel, a.group(2), a.group(1)))
+    return out
+
+
 def _index_text(rel: str, text: str) -> list[tuple]:
     kind = "doc" if rel.endswith((".md", ".txt")) else "string"
     out, seen = [], set()
@@ -165,6 +254,7 @@ def build(p: Project, full: bool = False) -> dict:
         con.executescript("DELETE FROM files; DELETE FROM defs; DELETE FROM refs; DELETE FROM imports; DELETE FROM aliases;")
     listed = repo_files(root)
     files = set(listed)
+    js_aliases = ts_paths(root)
     stats = {"files": 0, "changed": 0}
     old = dict(con.execute("SELECT path, sig FROM files").fetchall())
     for rel in set(old) - files:
@@ -181,7 +271,13 @@ def build(p: Project, full: bool = False) -> dict:
             con.execute(f"DELETE FROM {t} WHERE path = ?", (rel,))
         text = (root / rel).read_text(encoding="utf-8", errors="ignore")
         v = _index_python(rel, text, files) if rel.endswith(".py") else None
-        if v:
+        if rel.endswith(JS_EXT):
+            j = _index_js(rel, text, files, js_aliases)
+            con.executemany("INSERT INTO defs VALUES (?, ?, ?, ?, ?)", j["defs"])
+            con.executemany("INSERT INTO refs VALUES (?, ?, ?, ?)", j["refs"])
+            con.executemany("INSERT INTO imports VALUES (?, ?, ?)", j["imports"])
+            con.executemany("INSERT INTO aliases VALUES (?, ?, ?)", j["aliases"])
+        elif v:
             con.executemany("INSERT INTO defs VALUES (?, ?, ?, ?, ?)", v.defs)
             con.executemany("INSERT INTO refs VALUES (?, ?, ?, ?)", v.refs)
             con.executemany("INSERT INTO imports VALUES (?, ?, ?)", v.imports)

@@ -19,7 +19,18 @@ from brain.recall import code, history
 from brain.recall.text import norm, paths_in, terms
 from brain.traps import _rel, match as trap_match
 
-DEF_RE = re.compile(r"^\s*(?:async\s+)?(?:def|class)\s+([A-Za-z_]\w*)", re.M)
+DEF_RES = [
+    re.compile(r"^\s*(?:async\s+)?(?:def|class)\s+([A-Za-z_]\w*)", re.M),  # Python
+    re.compile(r"^\s*(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s*\*?\s*([A-Za-z_$][\w$]*)", re.M),  # JS/TS
+    re.compile(r"^\s*(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)", re.M),
+    re.compile(r"^\s*(?:export\s+)?(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*(?::[^=\n]{0,200})?=\s*(?:async\s+)?"
+               r"(?:\([^)\n]*\)\s*(?::[^=\n]{0,120})?=>|[A-Za-z_$][\w$]*\s*=>|function\b)", re.M),
+    re.compile(r"^\s*export\s+(?:const|let|var|interface|type|enum)\s+([A-Za-z_$][\w$]*)", re.M),
+]
+
+
+def _def_names(src: str) -> set[str]:
+    return {n for rx in DEF_RES for n in rx.findall(src or "")}
 
 
 def limits(p: Project) -> dict:
@@ -74,13 +85,14 @@ def file_context(p: Project, rel: str, max_chars: int) -> str:
     deps = code.dependents(p, rel)
     if deps:
         lines.append(f"- File phụ thuộc vào file này ({len(deps)}): " + ", ".join(deps[:5]) + (" …" if len(deps) > 5 else ""))
-    outside = []
+    outside = set()
     for name, _line in code.defs_in(p, rel)[:12]:
         for r in code.uses(p, name):
-            if not r.path.endswith(".py") and r.path != rel:
-                outside.append(f"{name} → {r.path}:{r.line}")
+            if r.kind != "code" and r.path != rel:  # config/data (string) first, then docs
+                outside.add((r.kind != "string", f"{name} → {r.path}:{r.line}"))
     if outside:
-        lines.append("- Tên trong file này được tham chiếu ngoài code Python: " + "; ".join(sorted(set(outside))[:5]))
+        lines.append("- Tên trong file này được nhắc ngoài code (config/data/tài liệu): "
+                     + "; ".join(t for _, t in sorted(outside)[:5]))
     defined = [n for n, _ in code.defs_in(p, rel)]
     about = history.about_file(p, rel, limit=3)
     seen = {h.key for h in about}
@@ -101,8 +113,8 @@ def _removed_defs(tool_input: dict) -> list[str]:
     pairs += [(e.get("old_string", ""), e.get("new_string", "")) for e in tool_input.get("edits") or [] if isinstance(e, dict)]
     gone = []
     for old, new in pairs:
-        kept = set(DEF_RE.findall(new or ""))
-        gone += [n for n in DEF_RE.findall(old or "") if n not in kept]
+        kept = _def_names(new)
+        gone += [n for n in _def_names(old) if n not in kept]
     return sorted(set(gone))
 
 
