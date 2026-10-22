@@ -1,6 +1,6 @@
 # ADR-013 — Wiki tra theo nghĩa: agent hiểu, brain tìm (thay chỗ cognee)
 
-**Ngày:** 2026-10-22 · **Trạng thái:** proposed: eval 2026-10-22 không cho thấy lợi ích ở cỡ 79 trang (xem Kết quả)
+**Ngày:** 2026-10-22 · **Trạng thái:** accepted 2026-10-22 (bản rút gọn, xem Quyết định cuối)
 
 ## Context
 User cần tra wiki kiến thức (`D:\SecondBrain\AI Agentic\wiki`, 79 trang) **theo nghĩa**, không chỉ theo từ khoá, và muốn một lựa chọn thay cognee. Cognee có embedding và graph, nhưng cần server, venv nặng, và LLM để dựng graph (tốn quota). Như vậy là trái ADR-010.
@@ -24,3 +24,10 @@ User cần tra wiki kiến thức (`D:\SecondBrain\AI Agentic\wiki`, 79 trang) *
 - Search thô: 8/18 đúng. Agent tự đọc `index.md`: **18/18, 14 giây/câu**. Skill `wiki` bản map-first: 18/18, 39 giây/câu.
 - Kết luận: phần hiểu nghĩa đúng là đến từ agent đọc danh mục. Nhưng ở cỡ wiki hiện tại, skill và search **không thắng** baseline mà còn chậm hơn.
 - Giữ `brain wiki map` / `search` / `related` như công cụ. Có bật skill mặc định hay không thì chờ user quyết; cần eval thêm cho wiki lớn, danh mục cũ, và câu hỏi về chi tiết sâu.
+
+## Quyết định cuối (user chốt 2026-10-22: phương án 1+2)
+- **Mặc định:** agent đọc danh mục và chọn theo nghĩa. Có một dòng trong CLAUDE block, SessionStart và SCHEMA.md của wiki: "`brain wiki map` (hoặc index.md), chọn trang theo nghĩa rồi Read".
+- **`brain wiki map|search|related`** được giữ làm công cụ. `map` thay cho index.md khi index.md cũ.
+- **Skill `wiki` là opt-in** (`brain skills install --only wiki`), không cài cùng `init`.
+- **Hook prompt** vẫn tắt.
+- **Xét lại khi:** wiki vượt khoảng 300 trang, hoặc có eval câu hỏi chi tiết sâu.

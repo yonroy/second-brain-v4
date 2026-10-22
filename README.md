@@ -26,6 +26,12 @@ v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/s
 - ✅ pha 6: bench v4. **v4 24/24 (100%) so với v3 14/24 (58%)** trên T17–T24, xem [docs/bench/20261022-v3-vs-v4.md](docs/bench/20261022-v3-vs-v4.md);
 - ⏳ pha 7: wiki.
 
+**v4.1-dev: tra wiki kiến thức chung** (ADR-013):
+- Đăng ký wiki: `brain wiki add <thư mục> --name <tên>`. Cấu hình nằm ở `<hub>/wiki.toml`.
+- Agent dùng `brain wiki map` (danh mục tự sinh, mỗi trang một dòng), chọn trang **theo nghĩa** rồi Read.
+- Tìm chi tiết sâu: `brain wiki search "cách hỏi 1" "cách hỏi 2" …`. Xem quan hệ giữa các trang: `brain wiki related <trang>`.
+- Skill `wiki` là opt-in: `brain skills install --only wiki`. Eval cho thấy agent đọc danh mục đã đúng 18/18 và nhanh hơn dùng skill; xem [docs/bench/20261022-wiki-eval.md](docs/bench/20261022-wiki-eval.md).
+
 ## CLI `brain`
 
 Chỉ dùng thư viện chuẩn, Python ≥ 3.11. Chạy từ bất kỳ thư mục nào:

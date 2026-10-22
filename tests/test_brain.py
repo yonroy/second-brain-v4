@@ -316,7 +316,7 @@ class HookInstallTests(Base):
     def test_skills_install_links_and_is_idempotent(self):
         from brain import skills
         first = dict(skills.install(self.code))
-        self.assertEqual(set(first), {"work", "explain", "tdd", "cross-review", "root-fix", "decision-log", "recall", "wiki"})
+        self.assertEqual(set(first), {"work", "explain", "tdd", "cross-review", "root-fix", "decision-log", "recall"})
         self.assertTrue((self.code / ".claude" / "skills" / "work" / "playbooks" / "bug-fix.md").exists())
         self.assertTrue((self.code / ".claude" / "skills" / "work" / "principles" / "idempotent.md").exists())
         again = dict(skills.install(self.code))

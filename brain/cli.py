@@ -259,6 +259,9 @@ def cmd_wiki(a) -> int:
             print("(không trang nào khớp — thử cách diễn đạt khác, tiếng Anh/Việt, hoặc `brain wiki map`)")
         print("\n".join(wiki.format_hit(h, i) for i, h in enumerate(hits, 1)))
     elif a.what == "map":
+        if not wiki.wikis():
+            print("Chưa có wiki nào: `brain wiki add <thư mục>`.")
+            return 1
         lines = wiki.catalog(prefix=a.args[0] if a.args else None, tag=a.tag, wiki=a.name)
         print("\n".join(lines) or "(trống)")
     elif a.what == "related":

@@ -15,6 +15,7 @@ from brain import paths
 from brain.hooks import _git_exclude
 
 SKILLS = paths.PACKAGE / "skills"
+OPT_IN = {"wiki"}  # ADR-013: an agent reading the catalogue was as accurate and faster; install with --only wiki
 
 
 def names() -> list[str]:
@@ -64,7 +65,7 @@ def install(codebase: Path | None = None, global_: bool = False, only: list[str]
     target = (Path.home() / ".claude" / "skills") if global_ else codebase / ".claude" / "skills"
     target.mkdir(parents=True, exist_ok=True)
     done = []
-    for name in [n for n in names() if not only or n in only]:
+    for name in [n for n in names() if (n in only if only else n not in OPT_IN)]:
         src, dst = SKILLS / name, target / name
         if dst.exists() or dst.is_symlink():
             if _points_to(dst, src):
