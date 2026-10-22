@@ -60,11 +60,11 @@ def _unlink(dst: Path) -> None:
         os.rmdir(dst)  # Windows junctions are removed as empty directories
 
 
-def install(codebase: Path | None = None, global_: bool = False) -> list[tuple[str, str]]:
+def install(codebase: Path | None = None, global_: bool = False, only: list[str] | None = None) -> list[tuple[str, str]]:
     target = (Path.home() / ".claude" / "skills") if global_ else codebase / ".claude" / "skills"
     target.mkdir(parents=True, exist_ok=True)
     done = []
-    for name in names():
+    for name in [n for n in names() if not only or n in only]:
         src, dst = SKILLS / name, target / name
         if dst.exists() or dst.is_symlink():
             if _points_to(dst, src):

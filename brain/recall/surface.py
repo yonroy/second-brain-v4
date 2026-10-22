@@ -212,6 +212,17 @@ def context_for_prompt(p: Project, hook: dict) -> str:
             if led.take(h.key, format_hit(h))]
     if hist:
         parts.append("📚 brain recall (lịch sử liên quan tới yêu cầu này):\n" + "\n".join(hist))
+    try:
+        from brain.recall import wiki
+        ptr = []
+        for h in wiki.prompt_pointers(prompt):
+            line = f"- `{h.rel}` {h.title}: {_one_line(h.summary, 150)} ({h.file})"
+            if led.take(h.key, line):
+                ptr.append(line)
+        if ptr:
+            parts.append("📘 wiki có trang có thể liên quan (đọc nếu cần):\n" + "\n".join(ptr))
+    except Exception:  # noqa: BLE001 — wiki is optional
+        pass
     if not parts:
         return ""
     led.save()

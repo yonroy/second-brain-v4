@@ -126,6 +126,14 @@ def start_text(p: Project, hook: dict | None = None, max_traps: int = 5) -> str:
     doing = [s for s in p.stories() if s.meta.get("status") == "doing"]
     if doing:
         out += ["", "--- Story đang làm ---"] + [f"- {s.meta.get('id', s.path.stem)} {s.path.name}" for s in doing]
+    try:
+        from brain.recall import wiki
+        ws = wiki.stats()
+        if ws["wikis"]:
+            out += ["", f"Wiki: {ws['pages']} trang ({', '.join(ws['names'])}). Câu hỏi kiến thức chung (không riêng dự án) → "
+                        "skill `wiki`: `brain wiki search \"cách hỏi 1\" \"cách hỏi 2\" …` hoặc `brain wiki map`."]
+    except Exception:  # noqa: BLE001 — wiki is optional, never breaks the session
+        pass
     out += ["", f"Luật ghi + thứ bậc sự thật: {paths.fwd(p.file('AGENTS.md'))}"]
     return "\n".join(out)
 

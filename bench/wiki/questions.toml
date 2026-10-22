@@ -1,0 +1,93 @@
+# Wiki retrieval eval (v4.1). Questions are deliberately worded AWAY from page titles/tags, so a keyword match on
+# the raw question is unlikely; `expect` = pages that correctly answer it (any one counts).
+# Target wiki: D:/SecondBrain/AI Agentic/wiki (snapshot 2026-10-22, 79 pages).
+
+[[q]]
+id = "W01"
+text = "Làm sao để con AI viết code không quên những gì đã làm sau mỗi lần mở lại?"
+expect = ["concepts/memory-system.md", "concepts/second-brain.md", "synthesis/second-brain-v3.md", "concepts/hook-first-harness.md"]
+
+[[q]]
+id = "W02"
+text = "Muốn cấm agent tuyên bố đã xong khi chưa chạy kiểm thử thì làm cách nào?"
+expect = ["concepts/hook-first-harness.md", "concepts/claude-hooks.md", "sources/automate-workflows-with-hooks.md"]
+
+[[q]]
+id = "W03"
+text = "Chuẩn nào giúp nối trợ lý AI với cơ sở dữ liệu và dịch vụ bên ngoài một cách thống nhất?"
+expect = ["concepts/mcp.md", "sources/mcp-integrate-agents-databases-apis.md"]
+
+[[q]]
+id = "W04"
+text = "Nhét tài liệu tra được vào lúc model trả lời để nó bớt bịa — kỹ thuật này tên gì, hoạt động ra sao?"
+expect = ["concepts/rag.md"]
+
+[[q]]
+id = "W05"
+text = "Công cụ nào cho chạy nhiều ô terminal, mỗi ô một agent, rồi theo dõi từ điện thoại?"
+expect = ["entities/herdr.md", "sources/herdr.md", "templates/herdr-orchestrator-template.md"]
+
+[[q]]
+id = "W06"
+text = "Robot học cầm nắm đồ vật bằng một mô hình nền tảng vừa nhìn vừa hiểu lệnh vừa ra động tác"
+expect = ["concepts/vla-models.md", "sources/robot-foundation-models.md", "entities/physical-intelligence.md", "synthesis/blog-robot-foundation-models.md"]
+
+[[q]]
+id = "W07"
+text = "Làm sao biết phần nào trong codebase có thể để AI viết mà mình không cần review kỹ?"
+expect = ["concepts/leaf-node-architecture.md", "sources/vibe-coding-in-production-anthropic.md"]
+
+[[q]]
+id = "W08"
+text = "Cách tính tiền và số phút thật mà mỗi lượt chạy của agent tiêu tốn"
+expect = ["concepts/agent-run-metrics.md"]
+
+[[q]]
+id = "W09"
+text = "Đóng gói một quy trình chuyên môn thành thư mục để agent tự lấy ra dùng khi gặp việc phù hợp"
+expect = ["concepts/skills-agent.md", "sources/anthropic-future-skills-not-agents.md"]
+
+[[q]]
+id = "W10"
+text = "Làm sao bớt tiền phải trả khi cuộc trò chuyện với Claude kéo quá dài?"
+expect = ["sources/token-optimization-tips.md", "concepts/context-engineering.md"]
+
+[[q]]
+id = "W11"
+text = "Có nền tảng nào lưu trí nhớ cho agent bằng đồ thị tri thức kết hợp tìm kiếm vector không?"
+expect = ["entities/cognee.md", "sources/cognee.md", "synthesis/cognee-vs-second-brain-v3.md"]
+
+[[q]]
+id = "W12"
+text = "Một phiên trưởng nhóm điều phối nhiều phiên Claude khác cùng lúc, chia việc qua một danh sách chung"
+expect = ["concepts/agent-teams.md", "sources/agent-teams.md", "sources/claude-code-agent-teams-30-tips.md", "templates/agent-team-playbook.md"]
+
+[[q]]
+id = "W13"
+text = "Chu trình nhìn môi trường, cân nhắc, ra tay rồi lặp lại mà mọi agent đều đi qua"
+expect = ["concepts/agentic-loop.md"]
+
+[[q]]
+id = "W14"
+text = "Viết yêu cầu thế nào để model suy luận từng bước rồi trả về dữ liệu có cấu trúc?"
+expect = ["concepts/prompt-engineering.md", "sources/prompt-engineering-full-course.md"]
+
+[[q]]
+id = "W15"
+text = "Bộ chấm điểm tự động so các phiên bản bộ nhớ của mình với nhau chạy ra sao?"
+expect = ["synthesis/second-brain-benchmark.md"]
+
+[[q]]
+id = "W16"
+text = "Gói plugin biến trình soạn code AI thành có sẵn sổ tay quy trình và nguyên tắc làm việc"
+expect = ["entities/pstack.md", "sources/cursor-pstack.md", "synthesis/pstack-vs-second-brain-harness.md"]
+
+[[q]]
+id = "W17"
+text = "Giao gần hết việc cho AI mà không đọc code thì làm sao vẫn yên tâm đưa lên môi trường thật?"
+expect = ["concepts/vibe-coding.md", "sources/vibe-coding-in-production-anthropic.md", "concepts/leaf-node-architecture.md"]
+
+[[q]]
+id = "W18"
+text = "Khung phần mềm của hãng Redmond để các agent nói chuyện qua lại với nhau"
+expect = ["entities/autogen.md"]

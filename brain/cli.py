@@ -239,9 +239,47 @@ def cmd_graph(a) -> int:
     return 0
 
 
+def cmd_wiki(a) -> int:
+    from brain.recall import wiki
+    if a.what == "add":
+        if not a.args:
+            raise SystemExit("brain wiki add <thư mục wiki> [--name tên]")
+        path = Path(a.args[0])
+        print(f"Đã ghi {wiki.add(path, a.name or path.resolve().name)}")
+        print(f"Index: {wiki.build()['pages']} trang")
+    elif a.what == "index":
+        r = wiki.build(full=a.full)
+        print(f"wiki: {r['pages']} trang · {r['changed']} cập nhật · {r['removed']} xoá → {paths.fwd(wiki.db_path())}")
+    elif a.what == "search":
+        if not wiki.wikis():
+            print("Chưa có wiki nào: `brain wiki add <thư mục>`.")
+            return 1
+        hits = wiki.search(a.args, k=a.limit, wiki=a.name)
+        if not hits:
+            print("(không trang nào khớp — thử cách diễn đạt khác, tiếng Anh/Việt, hoặc `brain wiki map`)")
+        print("\n".join(wiki.format_hit(h, i) for i, h in enumerate(hits, 1)))
+    elif a.what == "map":
+        lines = wiki.catalog(prefix=a.args[0] if a.args else None, tag=a.tag, wiki=a.name)
+        print("\n".join(lines) or "(trống)")
+    elif a.what == "related":
+        if not a.args:
+            raise SystemExit("brain wiki related <trang, vd concepts/memory-system>")
+        r = wiki.related(a.args[0])
+        if not r:
+            print("(không thấy trang)")
+            return 1
+        print(f"{r['page']['title']} — {r['page']['file']}")
+        for label, rows in (("Trỏ tới", r["out"]), ("Được trỏ từ", r["back"]), ("Cùng ≥2 tag", r["tags"])):
+            print(f"{label}: " + (", ".join(f"`{x['rel']}`" for x in rows) or "—"))
+    else:
+        s = wiki.stats()
+        print(f"wiki: {s['wikis']} nguồn {s.get('names', [])} · {s['pages']} trang · config {paths.fwd(wiki.config_path())}")
+    return 0
+
+
 def cmd_skills(a) -> int:
     codebase = None if a.global_ else _project(a).codebase
-    for name, how in skills.install(codebase, global_=a.global_):
+    for name, how in skills.install(codebase, global_=a.global_, only=a.only):
         print(f"  {name}: {how}")
     return 0
 
@@ -328,6 +366,7 @@ def main(argv=None) -> int:
     s = sub.add_parser("skills", help="link skill lớp thực thi (work, explain, recall, tdd, cross-review, root-fix, decision-log)")
     s.add_argument("action", choices=["install"], nargs="?", default="install")
     s.add_argument("--global", dest="global_", action="store_true", help="vào ~/.claude/skills thay vì codebase")
+    s.add_argument("--only", nargs="+", help="chỉ các skill này (vd: --global --only wiki)")
     s.set_defaults(fn=cmd_skills)
 
     s = sub.add_parser("hooks", help="cài / gỡ / xem hook Claude Code của project")
@@ -417,6 +456,15 @@ def main(argv=None) -> int:
     s.add_argument("what", choices=["uses", "defines", "dependents", "deps"])
     s.add_argument("target")
     s.set_defaults(fn=cmd_graph)
+
+    s = sub.add_parser("wiki", help="tra wiki (v4.1): search nhiều cách hỏi · map · related · index · add · status")
+    s.add_argument("what", choices=["search", "map", "related", "index", "add", "status"])
+    s.add_argument("args", nargs="*", help="search: các cách diễn đạt; map: thư mục con; related: trang; add: thư mục")
+    s.add_argument("--name", help="chỉ wiki này (add: tên wiki)")
+    s.add_argument("--tag", help="map: lọc theo tag")
+    s.add_argument("--limit", type=int, default=5)
+    s.add_argument("--full", action="store_true", help="index: dựng lại từ đầu")
+    s.set_defaults(fn=cmd_wiki)
 
     s = sub.add_parser("version")
     s.set_defaults(fn=lambda _a: print(f"brain {VERSION}") or 0)
