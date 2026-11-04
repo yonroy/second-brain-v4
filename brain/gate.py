@@ -33,6 +33,7 @@ def check(project: Project, today: date | None = None) -> list[Finding]:
     out += _proofs(project)
     out += _stories(project)
     out += _legacy(project)
+    out += _lat(project)
     return out
 
 
@@ -155,6 +156,20 @@ def _legacy(p: Project) -> list[Finding]:
         out.append(Finding(RED, f"CLAUDE.md còn block {', '.join(old)} (hai thế hệ brain cùng chạy)",
                            "chạy `brain hooks migrate` (gỡ block + hook của thế hệ cũ, link lại skill). Đừng dùng `hooks remove` của v3: nó gỡ cả hook v4"))
     return out
+
+
+def _lat(p: Project) -> list[Finding]:
+    """Opt-in (`[lat] gate = true`, ADR-014): broken links between memory and code. Silent when off."""
+    from brain import latmd
+    if not latmd.enabled(p):
+        return []
+    code, out = latmd.check(p)
+    if code == 0:
+        return []
+    if code == 2:
+        return [Finding(YELLOW, "[lat] gate bật nhưng lat không chạy được", out)]
+    return [Finding(YELLOW, f"lat check: {latmd.errors_in(out)} lỗi link giữa memory và code",
+                    "`brain lat check` để xem; sửa file memory gốc (fact `file:` trỏ tới file/hàm đã đổi, ID không tồn tại)")]
 
 
 def summary(project: Project, findings: list[Finding]) -> str:

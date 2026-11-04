@@ -32,6 +32,15 @@ v4 = v3 + **lớp Recall**: index lịch sử dài và code graph. Spec: [spec/s
 - Tìm chi tiết sâu: `brain wiki search "cách hỏi 1" "cách hỏi 2" …`. Xem quan hệ giữa các trang: `brain wiki related <trang>`.
 - Skill `wiki` là opt-in: `brain skills install --only wiki`. Eval cho thấy agent đọc danh mục đã đúng 18/18 và nhanh hơn dùng skill; xem [docs/bench/20261022-wiki-eval.md](docs/bench/20261022-wiki-eval.md).
 
+**v4.1-dev: graph lat.md cho memory dự án** (ADR-014):
+- `brain lat build`: dựng vault dẫn xuất `_projects/<p>/.lat/lat.md/` từ memory gốc. Format gốc không đổi.
+  - ID `ADR-/M-/S-/B-` và nguồn `file:src/x.py#func` tự thành `[[link]]`.
+  - Index thư mục và đoạn mở đầu section mà lat đòi được tự sinh.
+- `brain lat check`: chạy `lat check` với cwd là codebase, báo fact, trap hoặc ID trỏ tới file hay hàm không còn. Dòng lỗi được đổi về file gốc.
+- `brain lat section|refs|locate|search|ui …`: chạy lệnh lat tương ứng trên vault.
+- Cần lat trên PATH: `npm install -g @lat.md/core` (chỉ check, section, refs, locate) hoặc `lat.md` (thêm search và ui). Có thể chỉ định bằng env `BRAIN_LAT`.
+- Bật vào gate: `brain.toml` → `[lat] gate = true`.
+
 ## CLI `brain`
 
 Chỉ dùng thư viện chuẩn, Python ≥ 3.11. Chạy từ bất kỳ thư mục nào:
@@ -57,6 +66,7 @@ bin\brain.cmd <lệnh>                                # cmd / PowerShell
 | `promote [--min-days 2]` | Trap gặp ≥ 2 ngày mà chưa có enforcer, và trap trùng ở project khác (ứng viên `_global`). |
 | `skills [install] [--global]` | Link skill lớp thực thi vào `<codebase>/.claude/skills/` (hoặc `~/.claude/skills`). `init` cài sẵn; thêm `--no-skills` nếu không muốn. |
 | `hooks migrate` | Codebase đang có brain v3: gỡ block và hook của v3, cài lại hook v4, link skill về v4. **Đừng dùng `hooks remove` của v3**, vì nó gỡ cả hook v4. |
+| `lat [build\|check\|<lệnh lat>…]` | Memory dự án → vault lat.md dẫn xuất (`.lat/lat.md/`); `check` kiểm link memory ↔ code bằng `lat check`, lệnh khác chuyển cho lat (ADR-014). |
 | `hooks [install\|remove\|status]` | Cài, gỡ hoặc xem hook trong `<codebase>/.claude/settings.local.json`. `init` cài sẵn; thêm `--no-hooks` nếu không muốn. |
 
 ## Hook

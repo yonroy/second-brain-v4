@@ -280,6 +280,20 @@ def cmd_wiki(a) -> int:
     return 0
 
 
+def cmd_lat(a) -> int:
+    from brain import latmd
+    p = _project(a)
+    if a.action == "build":
+        v = latmd.build(p)
+        print(f"✅ vault lat → {paths.fwd(v.dir)} · {len(v.files)} file · {v.links} link từ ID/file:")
+        return 0
+    if a.action == "check":
+        code, out = latmd.check(p)
+        print(out or "✅ lat check: sạch")
+        return code
+    return latmd.run(p, [a.action, *a.rest])
+
+
 def cmd_skills(a) -> int:
     codebase = None if a.global_ else _project(a).codebase
     for name, how in skills.install(codebase, global_=a.global_, only=a.only):
@@ -468,6 +482,11 @@ def main(argv=None) -> int:
     s.add_argument("--limit", type=int, default=5)
     s.add_argument("--full", action="store_true", help="index: dựng lại từ đầu")
     s.set_defaults(fn=cmd_wiki)
+
+    s = sub.add_parser("lat", help="memory dự án → vault lat.md (ADR-014): build · check · section/refs/locate/search/ui …")
+    s.add_argument("action", nargs="?", default="check", help="build | check | lệnh lat bất kỳ (chạy trên vault vừa build)")
+    s.add_argument("rest", nargs=argparse.REMAINDER, help="tham số chuyển nguyên cho lat")
+    s.set_defaults(fn=cmd_lat)
 
     s = sub.add_parser("version")
     s.set_defaults(fn=lambda _a: print(f"brain {VERSION}") or 0)

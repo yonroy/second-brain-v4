@@ -23,6 +23,7 @@
 ## Tra lịch sử và code graph
 - `brain recall "<từ khoá>"`: journal cũ, quyết định (cả đã thay), archive, commit.
 - `brain graph uses <tên>`: mọi chỗ dùng, kể cả alias và chuỗi trong config/data. Chạy trước khi đổi hoặc xoá API.
+- `brain lat check`: fact `file:path#hàm`, trap và ID còn trỏ đúng chỗ không (cần lat). Ghi nguồn `file:` cụ thể để graph bắt được drift.
 
 ## Trước khi code
 - Đọc các quyết định và trap mà `brain start` in ra. Việc chạm đúng chủ đề đó thì làm theo, không làm ngược.

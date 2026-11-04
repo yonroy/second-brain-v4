@@ -15,3 +15,4 @@
 | [ADR-011](ADR-011-tiem-co-ngan-sach.md) | 2026-10-21 | Tiêm context có ngân sách và sổ ghi | accepted |
 | [ADR-012](ADR-012-quyet-dinh-theo-lien-quan.md) | 2026-10-21 | Quyết định theo liên quan thay cho in tất cả | accepted |
 | [ADR-013](ADR-013-wiki-agent-hieu-nghia.md) | 2026-10-22 | Wiki tra theo nghĩa: agent hiểu, brain tìm (thay cognee); skill opt-in | accepted |
+| [ADR-014](ADR-014-lat-vault-dan-xuat.md) | 2026-11-04 | Memory dự án → vault lat.md dẫn xuất (graph ID + `file:`), `brain lat check`; gate opt-in | accepted |
